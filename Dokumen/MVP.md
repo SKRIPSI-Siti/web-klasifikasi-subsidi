@@ -49,15 +49,15 @@ M7                █
 **Tujuan:** Menyiapkan fondasi teknis, tipe data, dan struktur folder sebelum membangun halaman — agar M1–M6 tinggal "merakit". **Project & style sudah ada** (template dashboard shadcn: style `base-rhea`, baseColor `mist`, ikon Tabler, font Space Grotesk/Geist Mono di `app/globals.css` & `app/layout.tsx`) — M0 fokus melengkapi struktur & kontrak data di atas fondasi tersebut, **bukan** menginisialisasi ulang project atau mengubah tema.
 
 ### Task Checklist
-- [ ] Verifikasi project & style yang sudah ada (`npm run dev`, cek `app/globals.css`, `components.json`) — **tidak** re-init `create-next-app` dan **tidak** mengubah token warna/font/radius yang sudah dikonfigurasi.
-- [ ] Tambahkan token warna semantik yang belum ada (mis. `--success`, `--warning`) di `app/globals.css` mengikuti format `oklch` & pola token yang sudah ada, untuk kebutuhan status Layak/Tidak Layak/Peringatan (PRD Bagian 16); `--destructive` yang sudah ada dipakai untuk "Tidak Layak".
-- [ ] Lengkapi struktur folder sesuai routing PRD Bagian 9 di atas struktur yang sudah ada: `app/(auth)`, `app/(dashboard)`, `components/layout`, `lib/data`, `lib/types.ts` (folder `components/ui`, `lib/utils.ts` sudah ada).
-- [ ] Definisikan **seluruh tipe entitas** di `lib/types.ts`: `Dataset`, `PreprocessingLog`, `Model`, `Prediction`, `Report`, `Activity`, `AdminUser` — mengikuti skema Supabase (PRD Bagian 14).
-- [ ] Buat **seed dummy terpusat** `lib/data/seed.ts` sesuai spesifikasi PRD Bagian 13 (3 dataset, 2 model, 3 prediksi, 2 laporan, 5 aktivitas, ±50 baris pelanggan/dataset).
-- [ ] Buat store global (Context/Zustand) + persist `localStorage` untuk mutasi dummy.
-- [ ] Lengkapi komponen dasar reusable yang **belum ada** di `components/ui/*`, dengan `npx shadcn add <nama>` (style `base-rhea`) bila tersedia di registry, atau disusun di atas primitives yang sudah ada bila tidak: **Dialog/Modal, Progress, Stepper, StatCard, EmptyState, Pagination**. (Button, Input, Select, Card, Table, Badge, Sidebar, Navbar/SiteHeader, Sheet/Drawer, Tabs, Tooltip, Skeleton, Toast/Sonner sudah tersedia — pakai apa adanya, jangan dibuat ulang.)
-- [ ] Rancang skema Supabase (SQL DDL) sebagai file dokumentasi `docs/schema.sql` (belum dijalankan).
-- [ ] Halaman placeholder untuk 16 route (judul + "coming soon") agar routing terverifikasi dini, memakai layout `AppSidebar`/`SiteHeader` yang sudah ada.
+- [x] Verifikasi project & style yang sudah ada (`npm run dev`, cek `app/globals.css`, `components.json`) — **tidak** re-init `create-next-app` dan **tidak** mengubah token warna/font/radius yang sudah dikonfigurasi.
+- [x] Tambahkan token warna semantik yang belum ada (mis. `--success`, `--warning`) di `app/globals.css` mengikuti format `oklch` & pola token yang sudah ada, untuk kebutuhan status Layak/Tidak Layak/Peringatan (PRD Bagian 16); `--destructive` yang sudah ada dipakai untuk "Tidak Layak".
+- [x] Lengkapi struktur folder sesuai routing PRD Bagian 9 di atas struktur yang sudah ada: `app/(auth)`, `app/(dashboard)`, `components/layout`, `lib/data`, `lib/types.ts` (folder `components/ui`, `lib/utils.ts` sudah ada).
+- [x] Definisikan **seluruh tipe entitas** di `lib/types.ts`: `Dataset`, `PreprocessingLog`, `Model`, `Prediction`, `Report`, `Activity`, `AdminUser` — mengikuti skema Supabase (PRD Bagian 14).
+- [x] Buat **seed dummy terpusat** `lib/data/seed.ts` sesuai spesifikasi PRD Bagian 13 (3 dataset, 2 model, 3 prediksi, 2 laporan, 5 aktivitas, ±50 baris pelanggan/dataset).
+- [x] Buat store global (Context/Zustand) + persist `localStorage` untuk mutasi dummy.
+- [x] Lengkapi komponen dasar reusable yang **belum ada** di `components/ui/*`, dengan `npx shadcn add <nama>` (style `base-rhea`) bila tersedia di registry, atau disusun di atas primitives yang sudah ada bila tidak: **Dialog/Modal, Progress, Stepper, StatCard, EmptyState, Pagination**. (Button, Input, Select, Card, Table, Badge, Sidebar, Navbar/SiteHeader, Sheet/Drawer, Tabs, Tooltip, Skeleton, Toast/Sonner sudah tersedia — pakai apa adanya, jangan dibuat ulang.)
+- [x] Rancang skema Supabase (SQL DDL) sebagai file dokumentasi `docs/schema.sql` (belum dijalankan).
+- [x] Halaman placeholder untuk 16 route (judul + "coming soon") agar routing terverifikasi dini, memakai layout `AppSidebar`/`SiteHeader` yang sudah ada.
 
 ### Deliverable
 - Project berjalan (`npm run dev`) dengan seluruh route ter-generate, tetap memakai style template yang sudah ada.
@@ -76,12 +76,12 @@ M7                █
 **Tujuan:** Alur masuk sistem + kerangka navigasi (sesuai Activity Diagram Login). Memenuhi **FR-A1…A4**.
 
 ### Task Checklist
-- [ ] `/login`: form email + password (toggle show/hide), validasi field kosong, loading saat submit, error inline untuk kredensial salah.
-- [ ] Kredensial dummy: `admin@pln.co.id` / `admin123` (didokumentasikan di README).
-- [ ] Simpan sesi dummy (cookie/`localStorage`) + middleware Next.js: tanpa sesi → redirect `/login`; sudah login akses `/login` → redirect `/dashboard`.
-- [ ] `layout.tsx` grup `(dashboard)`: Sidebar 7 menu (**Dashboard, Dataset, Preprocessing, Model, Prediksi, Laporan, Pengaturan**) dengan highlight menu aktif; Navbar (nama admin, avatar inisial, tombol logout).
-- [ ] Root `page.tsx` (`/`): redirect ke `/dashboard` atau `/login` sesuai sesi.
-- [ ] Sidebar collapsible untuk tablet (≥768px).
+- [x] `/login`: form email + password (toggle show/hide), validasi field kosong, loading saat submit, error inline untuk kredensial salah.
+- [x] Kredensial dummy: `admin@pln.co.id` / `admin123` (didokumentasikan di README).
+- [x] Simpan sesi dummy (cookie/`localStorage`) + middleware Next.js: tanpa sesi → redirect `/login`; sudah login akses `/login` → redirect `/dashboard`.
+- [x] `layout.tsx` grup `(dashboard)`: Sidebar 7 menu (**Dashboard, Dataset, Preprocessing, Model, Prediksi, Laporan, Pengaturan**) dengan highlight menu aktif; Navbar (nama admin, avatar inisial, tombol logout).
+- [x] Root `page.tsx` (`/`): redirect ke `/dashboard` atau `/login` sesuai sesi.
+- [x] Sidebar collapsible untuk tablet (≥768px).
 
 ### Deliverable
 - Login dummy fungsional dengan proteksi route penuh.
@@ -106,12 +106,12 @@ M7                █
 | `/dataset/[datasetId]` | Metadata, tabel data paginated (10/hal), ringkasan kolom (tipe & missing — placeholder), tombol "Lanjut ke Preprocessing" |
 
 ### Task Checklist
-- [ ] Render daftar dari store (seed M0), pencarian nama file (opsional).
-- [ ] Validasi ekstensi upload; file salah → error di dropzone (PRD Bagian 18).
-- [ ] Parsing preview dummy (boleh hasil parse nyata via PapaParse/SheetJS untuk CSV, atau mock).
-- [ ] "Simpan Dataset" → tambah entri baru ke store (status "Belum diproses") + toast + redirect ke detail.
-- [ ] Hapus dataset → dialog konfirmasi → hilang dari daftar.
-- [ ] Empty state daftar dataset (bila store dikosongkan).
+- [x] Render daftar dari store (seed M0), pencarian nama file (opsional).
+- [x] Validasi ekstensi upload; file salah → error di dropzone (PRD Bagian 18).
+- [x] Parsing preview dummy (boleh hasil parse nyata via PapaParse/SheetJS untuk CSV, atau mock).
+- [x] "Simpan Dataset" → tambah entri baru ke store (status "Belum diproses") + toast + redirect ke detail.
+- [x] Hapus dataset → dialog konfirmasi → hilang dari daftar.
+- [x] Empty state daftar dataset (bila store dikosongkan).
 
 ### Exit Criteria
 - ✅ Alur lengkap: daftar → upload → preview → simpan → muncul di daftar → buka detail.
@@ -131,11 +131,11 @@ M7                █
 | `/preprocessing/[datasetId]` | Stepper 5 langkah + panel ringkasan sebelum/sesudah + tombol eksekusi |
 
 ### Task Checklist
-- [ ] Stepper vertikal: **Cleaning Data → Handling Missing Value → Encoding Kategori → Normalisasi → Split Data (80:20)** dengan deskripsi singkat per langkah.
-- [ ] Simulasi eksekusi berurutan (delay ±1 dtk/langkah) dengan status ikon: menunggu ○ / berjalan ◐ (spinner) / selesai ✔.
-- [ ] Panel ringkasan sebelum/sesudah: total baris → baris valid, distribusi label Layak vs Tidak Layak (mini bar, angka dummy konsisten seed).
-- [ ] Selesai → banner sukses, status dataset di store berubah "Sudah preprocessing", tombol "Lanjut ke Training Model" → `/model/training?dataset=[id]`.
-- [ ] Tombol tidak bisa dipicu ulang saat proses berjalan.
+- [x] Stepper vertikal: **Cleaning Data → Handling Missing Value → Encoding Kategori → Normalisasi → Split Data (80:20)** dengan deskripsi singkat per langkah.
+- [x] Simulasi eksekusi berurutan (delay ±1 dtk/langkah) dengan status ikon: menunggu ○ / berjalan ◐ (spinner) / selesai ✔.
+- [x] Panel ringkasan sebelum/sesudah: total baris → baris valid, distribusi label Layak vs Tidak Layak (mini bar, angka dummy konsisten seed).
+- [x] Selesai → banner sukses, status dataset di store berubah "Sudah preprocessing", tombol "Lanjut ke Training Model" → `/model/training?dataset=[id]`.
+- [x] Tombol tidak bisa dipicu ulang saat proses berjalan.
 
 ### Exit Criteria
 - ✅ Status dataset di `/dataset` ikut berubah setelah proses selesai (satu store, FR-F5).
@@ -155,13 +155,13 @@ M7                █
 | `/model/evaluation/[modelId]` | 4 card metrik, Confusion Matrix 2×2, bar chart Feature Importance (9 fitur), info parameter, tombol "Jadikan Model Aktif" |
 
 ### Task Checklist
-- [ ] Form parameter dengan keterangan/tooltip tiap parameter + validasi rentang (PRD 7.8).
-- [ ] "Mulai Training" → buat `job_id` di store → redirect halaman progres.
-- [ ] Simulasi progres bertahap (interval) + log: "Memuat data…" → "Training iterasi i/n…" → "Menghitung metrik…" → "Selesai ✔"; tombol lanjut disabled sampai 100%.
-- [ ] Generate hasil evaluasi dummy realistis (Accuracy/Precision/Recall/F1 di kisaran 91–95%, confusion matrix konsisten dengan jumlah data uji, feature importance 9 fitur sesuai Data Dictionary).
-- [ ] Confusion Matrix dengan pewarnaan intensitas & label sumbu Aktual × Prediksi.
-- [ ] "Jadikan Model Aktif": hanya 1 model aktif; model aktif lama otomatis nonaktif; badge + toast.
-- [ ] Training tercatat sebagai aktivitas (Dashboard M6).
+- [x] Form parameter dengan keterangan/tooltip tiap parameter + validasi rentang (PRD 7.8).
+- [x] "Mulai Training" → buat `job_id` di store → redirect halaman progres.
+- [x] Simulasi progres bertahap (interval) + log: "Memuat data…" → "Training iterasi i/n…" → "Menghitung metrik…" → "Selesai ✔"; tombol lanjut disabled sampai 100%.
+- [x] Generate hasil evaluasi dummy realistis (Accuracy/Precision/Recall/F1 di kisaran 91–95%, confusion matrix konsisten dengan jumlah data uji, feature importance 9 fitur sesuai Data Dictionary).
+- [x] Confusion Matrix dengan pewarnaan intensitas & label sumbu Aktual × Prediksi.
+- [x] "Jadikan Model Aktif": hanya 1 model aktif; model aktif lama otomatis nonaktif; badge + toast.
+- [x] Training tercatat sebagai aktivitas (Dashboard M6).
 
 ### Exit Criteria
 - ✅ Admin bisa memicu training dummy end-to-end dan membuka evaluasi lengkap.
@@ -182,14 +182,14 @@ M7                █
 | `/prediksi/hasil/[predictionId]` | Hasil manual (label besar + confidence) atau batch (ringkasan + tabel) |
 
 ### Task Checklist
-- [ ] Guard: belum ada model aktif → alert kuning + tombol "Latih Model Sekarang" (PRD Bagian 18).
-- [ ] Form manual 9 field sesuai **Data Dictionary PRD Bagian 10**, dikelompokkan *Sosial Ekonomi* dan *Kelistrikan*; field kategori memakai `select`; validasi rentang numerik; submit disabled sampai valid.
-- [ ] Upload batch: dropzone CSV + preview ringkas.
-- [ ] "Jalankan Klasifikasi" → loading 1–2 dtk → hasil dummy (label + confidence 70–98%) → redirect halaman hasil.
-- [ ] Hasil manual: label besar **LAYAK** (hijau) / **TIDAK LAYAK** (merah) + confidence + rekap input.
-- [ ] Hasil batch: card ringkasan (total, X Layak, Y Tidak Layak) + tabel per baris.
-- [ ] "Simpan ke Laporan" → buat entri `report` di store + toast + tombol berubah "Tersimpan ✔"; "Export CSV" → toast placeholder.
-- [ ] Prediksi tercatat di riwayat & aktivitas.
+- [x] Guard: belum ada model aktif → alert kuning + tombol "Latih Model Sekarang" (PRD Bagian 18).
+- [x] Form manual 9 field sesuai **Data Dictionary PRD Bagian 10**, dikelompokkan *Sosial Ekonomi* dan *Kelistrikan*; field kategori memakai `select`; validasi rentang numerik; submit disabled sampai valid.
+- [x] Upload batch: dropzone CSV + preview ringkas.
+- [x] "Jalankan Klasifikasi" → loading 1–2 dtk → hasil dummy (label + confidence 70–98%) → redirect halaman hasil.
+- [x] Hasil manual: label besar **LAYAK** (hijau) / **TIDAK LAYAK** (merah) + confidence + rekap input.
+- [x] Hasil batch: card ringkasan (total, X Layak, Y Tidak Layak) + tabel per baris.
+- [x] "Simpan ke Laporan" → buat entri `report` di store + toast + tombol berubah "Tersimpan ✔"; "Export CSV" → toast placeholder.
+- [x] Prediksi tercatat di riwayat & aktivitas.
 
 ### Exit Criteria
 - ✅ Prediksi manual & batch dapat dijalankan dan hasilnya tervisualisasi jelas.
@@ -210,14 +210,14 @@ M7                █
 | `/pengaturan` | Profil admin + form ganti password (dummy) |
 
 ### Task Checklist
-- [ ] Daftar laporan membaca store yang sama dengan M5 (laporan tersimpan otomatis muncul).
-- [ ] Filter fungsional atas data dummy (tanggal/model/status).
-- [ ] Detail laporan menampilkan metrik model terkait + distribusi hasil (Recharts).
-- [ ] Dashboard: agregasi **dihitung dari store** (bukan angka hardcoded terpisah) → Total dataset, Total pelanggan dianalisis, Rasio Layak:Tidak Layak, Model aktif + akurasi.
-- [ ] Tabel aktivitas terbaru (5 entri terakhir dari store: import, preprocessing, training, prediksi, simpan laporan).
-- [ ] Shortcut: "Import Dataset Baru" → `/dataset/upload`; "Jalankan Prediksi Baru" → `/prediksi/baru`.
-- [ ] Empty state dashboard bila store kosong.
-- [ ] Pengaturan: card profil + form ganti password (validasi konfirmasi) + toast.
+- [x] Daftar laporan membaca store yang sama dengan M5 (laporan tersimpan otomatis muncul).
+- [x] Filter fungsional atas data dummy (tanggal/model/status).
+- [x] Detail laporan menampilkan metrik model terkait + distribusi hasil (Recharts).
+- [x] Dashboard: agregasi **dihitung dari store** (bukan angka hardcoded terpisah) → Total dataset, Total pelanggan dianalisis, Rasio Layak:Tidak Layak, Model aktif + akurasi.
+- [x] Tabel aktivitas terbaru (5 entri terakhir dari store: import, preprocessing, training, prediksi, simpan laporan).
+- [x] Shortcut: "Import Dataset Baru" → `/dataset/upload`; "Jalankan Prediksi Baru" → `/prediksi/baru`.
+- [x] Empty state dashboard bila store kosong.
+- [x] Pengaturan: card profil + form ganti password (validasi konfirmasi) + toast.
 
 ### Exit Criteria
 - ✅ Alur end-to-end penuh tertelusuri tanpa dead-end: Login → Dataset → Preprocessing → Training → Evaluasi → Prediksi → Laporan → Dashboard.
@@ -247,9 +247,9 @@ M7                █
 - [ ] Responsivitas: desktop ≥1280px penuh; tablet ≥768px terbaca & fungsional.
 
 **Kesiapan integrasi**
-- [ ] Semua akses data hanya lewat `lib/data/*` (grep pastikan tidak ada dummy inline di halaman).
-- [ ] Bentuk data dummy = kontrak API Flask (PRD Bagian 15).
-- [ ] `README.md`: cara run, kredensial dummy, peta folder, catatan integrasi.
+- [x] Semua akses data hanya lewat `lib/data/*` (grep pastikan tidak ada dummy inline di halaman).
+- [x] Bentuk data dummy = kontrak API Flask (PRD Bagian 15).
+- [x] `README.md`: cara run, kredensial dummy, peta folder, catatan integrasi.
 
 ### Exit Criteria
 - ✅ Seluruh Kriteria Penerimaan PRD Bagian 20 (butir 1–8) tercentang.
