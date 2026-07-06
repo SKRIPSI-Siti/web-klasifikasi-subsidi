@@ -47,7 +47,8 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      // event.key bisa undefined pada event sintetis (mis. autofill browser)
+      if (event.key?.toLowerCase() !== "d") {
         return
       }
 
