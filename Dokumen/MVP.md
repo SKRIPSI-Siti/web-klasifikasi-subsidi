@@ -46,27 +46,27 @@ M7                █
 
 ## 2. M0 — Setup Project & Design Foundation (1–2 hari)
 
-**Tujuan:** Menyiapkan fondasi teknis, tipe data, dan visual sebelum membangun halaman — agar M1–M6 tinggal "merakit".
+**Tujuan:** Menyiapkan fondasi teknis, tipe data, dan struktur folder sebelum membangun halaman — agar M1–M6 tinggal "merakit". **Project & style sudah ada** (template dashboard shadcn: style `base-rhea`, baseColor `mist`, ikon Tabler, font Space Grotesk/Geist Mono di `app/globals.css` & `app/layout.tsx`) — M0 fokus melengkapi struktur & kontrak data di atas fondasi tersebut, **bukan** menginisialisasi ulang project atau mengubah tema.
 
 ### Task Checklist
-- [ ] Inisialisasi project: `create-next-app` (App Router, TypeScript, Tailwind, ESLint).
-- [ ] Konfigurasi tema Tailwind: warna primer `#0F62AC`, semantik (hijau/merah/kuning/abu), font Inter, skala tipografi 24/20/16/14/12.
-- [ ] Struktur folder sesuai routing PRD Bagian 9: `app/(auth)`, `app/(dashboard)`, `components/ui`, `components/layout`, `lib/data`, `lib/types.ts`, `lib/utils.ts`.
+- [ ] Verifikasi project & style yang sudah ada (`npm run dev`, cek `app/globals.css`, `components.json`) — **tidak** re-init `create-next-app` dan **tidak** mengubah token warna/font/radius yang sudah dikonfigurasi.
+- [ ] Tambahkan token warna semantik yang belum ada (mis. `--success`, `--warning`) di `app/globals.css` mengikuti format `oklch` & pola token yang sudah ada, untuk kebutuhan status Layak/Tidak Layak/Peringatan (PRD Bagian 16); `--destructive` yang sudah ada dipakai untuk "Tidak Layak".
+- [ ] Lengkapi struktur folder sesuai routing PRD Bagian 9 di atas struktur yang sudah ada: `app/(auth)`, `app/(dashboard)`, `components/layout`, `lib/data`, `lib/types.ts` (folder `components/ui`, `lib/utils.ts` sudah ada).
 - [ ] Definisikan **seluruh tipe entitas** di `lib/types.ts`: `Dataset`, `PreprocessingLog`, `Model`, `Prediction`, `Report`, `Activity`, `AdminUser` — mengikuti skema Supabase (PRD Bagian 14).
 - [ ] Buat **seed dummy terpusat** `lib/data/seed.ts` sesuai spesifikasi PRD Bagian 13 (3 dataset, 2 model, 3 prediksi, 2 laporan, 5 aktivitas, ±50 baris pelanggan/dataset).
 - [ ] Buat store global (Context/Zustand) + persist `localStorage` untuk mutasi dummy.
-- [ ] Bangun komponen dasar reusable: **Button, Input, Select, Card, Table (+Pagination), Badge, Modal/Dialog, Toast, Stepper, StatCard, EmptyState, Skeleton, Sidebar, Navbar**.
+- [ ] Lengkapi komponen dasar reusable yang **belum ada** di `components/ui/*`, dengan `npx shadcn add <nama>` (style `base-rhea`) bila tersedia di registry, atau disusun di atas primitives yang sudah ada bila tidak: **Dialog/Modal, Progress, Stepper, StatCard, EmptyState, Pagination**. (Button, Input, Select, Card, Table, Badge, Sidebar, Navbar/SiteHeader, Sheet/Drawer, Tabs, Tooltip, Skeleton, Toast/Sonner sudah tersedia — pakai apa adanya, jangan dibuat ulang.)
 - [ ] Rancang skema Supabase (SQL DDL) sebagai file dokumentasi `docs/schema.sql` (belum dijalankan).
-- [ ] Halaman placeholder untuk 16 route (judul + "coming soon") agar routing terverifikasi dini.
+- [ ] Halaman placeholder untuk 16 route (judul + "coming soon") agar routing terverifikasi dini, memakai layout `AppSidebar`/`SiteHeader` yang sudah ada.
 
 ### Deliverable
-- Project berjalan (`npm run dev`) dengan seluruh route ter-generate.
-- Storybook mini/halaman `/dev/ui` (opsional) untuk melihat semua komponen dasar.
+- Project berjalan (`npm run dev`) dengan seluruh route ter-generate, tetap memakai style template yang sudah ada.
+- Storybook mini/halaman `/dev/ui` (opsional) untuk melihat komponen tambahan yang baru dibuat.
 - `docs/schema.sql` + `lib/types.ts` sebagai kontrak data.
 
 ### Exit Criteria (Definition of Done)
 - ✅ Semua 16 route dapat diakses (placeholder, tanpa 404).
-- ✅ Komponen dasar dipakai ulang tanpa styling ad-hoc.
+- ✅ Komponen dasar (bawaan template maupun tambahan) dipakai ulang tanpa styling ad-hoc, dan tidak ada token warna/font/ikon baru di luar yang sudah disepakati.
 - ✅ Tipe TypeScript entitas final & disepakati (tidak berubah tanpa alasan kuat).
 
 ---

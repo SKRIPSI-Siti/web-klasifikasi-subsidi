@@ -154,9 +154,9 @@ Format: *Sebagai Admin, saya ingin … agar …*
 | Layer | Teknologi | Alasan Pemilihan |
 |---|---|---|
 | Frontend | **Next.js 15 (App Router) + TypeScript** | Routing berbasis folder yang memetakan langsung sitemap; TypeScript menjaga kontrak data saat migrasi dummy → API |
-| Styling | **Tailwind CSS** | Cepat membangun dashboard konsisten; utility-first cocok untuk komponen tabel/kartu/form |
-| Komponen UI | Komponen custom + (opsional) **shadcn/ui** | Percepat form, table, dialog, toast dengan aksesibilitas bawaan |
-| Charting | **Recharts** | Integrasi React natural; cukup untuk pie/bar chart & confusion matrix custom |
+| Styling | **Tailwind CSS v4** (sudah terpasang) | Project sudah diinisialisasi dengan template dashboard shadcn — token warna, radius, dan font sudah dikonfigurasi di `app/globals.css`; tinggal dipakai, tidak diinisialisasi ulang |
+| Komponen UI | **shadcn/ui** (style `base-rhea`, baseColor `mist` — sudah terpasang di `components.json` & `components/ui/*`) | Template sudah menyediakan Button, Input, Select, Card, Table, Badge, Sidebar, Sheet/Drawer, Tabs, Tooltip, Skeleton, dll. Komponen tambahan yang dibutuhkan MVP (Dialog, Progress/Stepper, StatCard, EmptyState, Pagination) ditambahkan lewat `npx shadcn add <nama>` agar mengikuti style yang sama — bukan membangun design system baru |
+| Charting | **Recharts** (sudah terpasang) | Integrasi React natural; cukup untuk pie/bar chart & confusion matrix custom |
 | State dummy | React state + Context (atau **Zustand**) + `localStorage` | Data dummy bertahan antar-halaman & antar-refresh selama demo |
 | Backend (fase M8+) | **Python Flask + LightGBM** | Serving model: preprocessing, training, evaluasi, prediksi via REST API |
 | Database (fase M9+) | **Supabase (PostgreSQL)** | Simpan dataset, metadata model, hasil prediksi, laporan; Auth bawaan |
@@ -167,6 +167,7 @@ Format: *Sebagai Admin, saya ingin … agar …*
 1. **Data-layer terisolasi:** semua data dummy diakses melalui satu folder `lib/data/` (mis. `getDatasets()`, `runTrainingMock()`). Saat integrasi, hanya isi fungsi-fungsi ini yang diganti `fetch()` — halaman tidak berubah.
 2. **Tipe data dibekukan sejak awal:** semua entitas (Dataset, Model, Prediction, Report) didefinisikan sebagai TypeScript `interface` di `lib/types.ts`, mengikuti skema Supabase pada Bagian 14. Ini kontrak antara frontend ↔ backend.
 3. **Simulasi proses asinkron:** training/preprocessing dummy memakai `setInterval`/`setTimeout` agar loading state dan progress bar teruji nyata sejak MVP.
+4. **Style mengikuti template yang sudah ada, tidak dibangun ulang:** project sudah berisi template dashboard shadcn (style `base-rhea`, baseColor `mist`, ikon `@tabler/icons-react`, font Space Grotesk + Geist Mono via `app/layout.tsx`). Seluruh halaman MVP **wajib memakai token & komponen ini apa adanya** — dilarang menimpa `--primary`/warna lain dengan hex baru, mengganti font ke Inter, atau mengganti ikon ke lucide-react. Kebutuhan warna semantik tambahan (Layak/Tidak Layak/Peringatan) ditambahkan sebagai CSS variable baru bergaya oklch yang konsisten dengan token yang sudah ada, bukan hex literal lepas di komponen.
 
 ---
 
@@ -537,14 +538,16 @@ Format error seragam: `{ error: { code, message } }` dengan HTTP status semantik
 
 ## 16. Design System & Panduan UI
 
+> Design system **tidak dibangun dari nol** — project sudah memakai template dashboard shadcn (style `base-rhea`, baseColor `mist`) beserta token warna, radius, dan font-nya. Aturan di bawah ini menjelaskan cara memakai token yang sudah ada, bukan mendefinisikan token baru.
+
 | Elemen | Ketentuan |
 |---|---|
-| **Warna primer** | Biru PLN-like (mis. `#0F62AC`) untuk aksi utama & sidebar aktif |
-| **Warna semantik** | Hijau `#16A34A` = Layak/sukses; Merah `#DC2626` = Tidak Layak/error; Kuning `#F59E0B` = peringatan/pending; Abu = netral |
-| **Tipografi** | 1 keluarga font (mis. Inter); skala: 24/20/16/14/12 |
-| **Komponen wajib reusable** | Button (primary/secondary/danger/ghost), Input, Select, Card, Table (+ pagination), Badge status, Modal/Dialog, Toast, Stepper, StatCard, EmptyState, Skeleton |
-| **Layout dashboard** | Sidebar tetap kiri (≥1024px), collapsible di tablet; konten max-width nyaman; padding konsisten (mis. `p-6`) |
-| **Ikon** | lucide-react, ukuran konsisten 16/20px |
+| **Warna** | Pakai token CSS variable yang sudah ada di `app/globals.css` (`--primary`, `--secondary`, `--muted`, `--destructive`, `--card`, `--border`, dst — format `oklch`, dikelola shadcn). Jangan hardcode hex baru atau menimpa token yang sudah ada. |
+| **Warna semantik status** | Layak/Tidak Layak/Peringatan/Netral belum punya token khusus → tambahkan variable baru (mis. `--success`, `--warning`) di `:root` & `.dark` pada `app/globals.css`, mengikuti format `oklch` & pola penamaan yang sudah ada (bukan hex literal langsung di komponen). `--destructive` yang sudah ada dipakai untuk status "Tidak Layak". |
+| **Tipografi** | Font mengikuti konfigurasi `app/layout.tsx` yang sudah ada: Space Grotesk sebagai `--font-sans`, Geist Mono sebagai `--font-mono` (dipakai untuk log training). Skala ukuran memakai utility Tailwind yang sudah dipakai template (`text-2xl/xl/base/sm/xs`) — tidak mengganti ke font lain (mis. Inter). |
+| **Komponen wajib reusable** | Gunakan komponen yang sudah ada di `components/ui/*`: Button, Input, Select, Card, Table, Badge, Sidebar, Sheet/Drawer (pengganti Modal), Tabs, Tooltip, Skeleton, Checkbox, Toggle, Separator, Breadcrumb, Avatar, Dropdown-menu, Sonner (Toast). Komponen yang belum tersedia (Dialog, Progress, Stepper, StatCard, EmptyState, Pagination) ditambahkan lewat `npx shadcn add <nama>` (style `base-rhea`) bila tersedia di registry, atau disusun di atas primitives yang sudah ada bila tidak — tetap satu bahasa visual, tanpa styling ad-hoc. |
+| **Layout dashboard** | Ikuti struktur `AppSidebar` + `SiteHeader` yang sudah ada (sidebar kiri collapsible, breadcrumb di header, padding konten `p-4`/`p-6` sesuai template) — bukan layout baru. |
+| **Ikon** | **Tabler Icons** (`@tabler/icons-react`, sudah terpasang & dipakai di `AppSidebar`) — jangan menambah lucide-react atau library ikon lain. |
 | **Bahasa antarmuka** | Bahasa Indonesia penuh; istilah ML tetap Inggris bila lazim (Accuracy, F1-Score) + tooltip penjelasan |
 
 ---
