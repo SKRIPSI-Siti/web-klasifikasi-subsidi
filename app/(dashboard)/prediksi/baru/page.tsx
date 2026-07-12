@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { predictRow } from "@/lib/data/mock-api"
-import { generateRows } from "@/lib/data/seed"
+import * as api from "@/lib/data/api"
+import { parseCustomerCsv } from "@/lib/data/csv"
 import { generateId, useActiveModel, useStore } from "@/lib/data/store"
 import { formatPercent } from "@/lib/format"
 import type {
@@ -34,6 +34,7 @@ import type {
   DayaVA,
   GolonganTarif,
   Pekerjaan,
+  PredictionResultRow,
   StatusBansos,
   StatusRumah,
 } from "@/lib/types"
@@ -42,21 +43,34 @@ import {
   IconLoader2,
   IconWand,
 } from "@tabler/icons-react"
+import { toast } from "sonner"
 
+// Urutan pilihan mengikuti kategori nyata dataset model (lihat lib/types.ts).
 const PEKERJAAN_OPTS: Pekerjaan[] = [
+  "ASN",
+  "PNS",
+  "Dosen",
+  "Dokter",
+  "Guru Honorer",
+  "Manajer",
+  "Pengusaha",
+  "Wiraswasta",
+  "Karyawan Swasta",
+  "Teknisi",
+  "Pedagang Kecil",
+  "Penjahit",
+  "Sopir",
+  "Satpam",
   "Petani",
   "Nelayan",
-  "Buruh",
-  "Wiraswasta",
-  "PNS",
-  "Karyawan Swasta",
-  "Tidak Bekerja",
-  "Lainnya",
+  "Tukang Bangunan",
+  "Buruh Harian Lepas",
+  "Pemulung",
 ]
-const RUMAH_OPTS: StatusRumah[] = ["Milik Sendiri", "Sewa/Kontrak", "Menumpang"]
-const BANSOS_OPTS: StatusBansos[] = ["PKH", "BPNT", "PKH & BPNT", "Tidak Menerima"]
-const DAYA_OPTS: DayaVA[] = ["450 VA", "900 VA"]
-const TARIF_OPTS: GolonganTarif[] = ["R-1/450 VA", "R-1/900 VA", "R-1M/900 VA"]
+const RUMAH_OPTS: StatusRumah[] = ["Milik Sendiri", "Kontrak", "Menumpang"]
+const BANSOS_OPTS: StatusBansos[] = ["PKH", "BPNT", "PKH & BPNT", "Tidak"]
+const DAYA_OPTS: DayaVA[] = [450, 900, 1300, 2200]
+const TARIF_OPTS: GolonganTarif[] = ["R-1/450", "R-1/900", "R-1/1300", "R-1/2200"]
 
 interface ManualForm {
   penghasilan: string
@@ -186,7 +200,36 @@ export default function PrediksiBaruPage() {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  function runManual() {
+  function commitPrediction(
+    hasil: PredictionResultRow[],
+    jenis: "manual" | "batch",
+    nama_file?: string
+  ) {
+    if (!activeModel) return
+    const id = generateId("prd")
+    dispatch({
+      type: "addPrediction",
+      prediction: {
+        id,
+        model_id: activeModel.id,
+        jenis,
+        nama_file,
+        hasil,
+        jumlah_layak: hasil.filter((h) => h.label === "Layak").length,
+        jumlah_tidak: hasil.filter((h) => h.label === "Tidak Layak").length,
+        created_at: new Date().toISOString(),
+      },
+    })
+    addActivity(
+      "prediksi",
+      jenis === "manual"
+        ? "Prediksi manual 1 pelanggan dijalankan"
+        : `Prediksi batch ${nama_file} (${hasil.length} data) dijalankan`
+    )
+    router.push(`/prediksi/hasil/${id}`)
+  }
+
+  async function runManual() {
     setTouched(true)
     if (!manualValid || !activeModel) return
     setRunning(true)
@@ -202,53 +245,27 @@ export default function PrediksiBaruPage() {
       golongan_tarif: form.golongan_tarif!,
       pemakaian_kwh: Number(form.pemakaian_kwh),
     }
-    const hasil = [predictRow(row)]
-    const id = generateId("prd")
-    window.setTimeout(() => {
-      dispatch({
-        type: "addPrediction",
-        prediction: {
-          id,
-          model_id: activeModel.id,
-          jenis: "manual",
-          hasil,
-          jumlah_layak: hasil.filter((h) => h.label === "Layak").length,
-          jumlah_tidak: hasil.filter((h) => h.label === "Tidak Layak").length,
-          created_at: new Date().toISOString(),
-        },
-      })
-      addActivity("prediksi", "Prediksi manual 1 pelanggan dijalankan")
-      router.push(`/prediksi/hasil/${id}`)
-    }, 1200)
+    try {
+      const hasil = await api.predict(activeModel.id, [row], "manual")
+      commitPrediction(hasil, "manual")
+    } catch (e) {
+      setRunning(false)
+      toast.error(e instanceof api.ApiError ? e.message : "Gagal menjalankan prediksi.")
+    }
   }
 
-  function runBatch() {
+  async function runBatch() {
     if (!file || !activeModel) return
     setRunning(true)
-    const seedNum = Array.from(file.name).reduce((a, c) => a + c.charCodeAt(0), 0)
-    const rows = generateRows(seedNum, 20 + (seedNum % 30), "BATCH-").map((r) => ({
-      ...r,
-      label: undefined,
-    }))
-    const hasil = rows.map(predictRow)
-    const id = generateId("prd")
-    window.setTimeout(() => {
-      dispatch({
-        type: "addPrediction",
-        prediction: {
-          id,
-          model_id: activeModel.id,
-          jenis: "batch",
-          nama_file: file.name,
-          hasil,
-          jumlah_layak: hasil.filter((h) => h.label === "Layak").length,
-          jumlah_tidak: hasil.filter((h) => h.label === "Tidak Layak").length,
-          created_at: new Date().toISOString(),
-        },
-      })
-      addActivity("prediksi", `Prediksi batch ${file.name} (${hasil.length} data) dijalankan`)
-      router.push(`/prediksi/hasil/${id}`)
-    }, 1500)
+    try {
+      const rows = await parseCustomerCsv(file)
+      if (rows.length === 0) throw new api.ApiError("File tidak berisi baris data.", "empty_file")
+      const hasil = await api.predict(activeModel.id, rows, "batch")
+      commitPrediction(hasil, "batch", file.name)
+    } catch (e) {
+      setRunning(false)
+      toast.error(e instanceof api.ApiError ? e.message : "Gagal memproses file batch.")
+    }
   }
 
   if (!hydrated) {
@@ -372,14 +389,35 @@ export default function PrediksiBaruPage() {
               <fieldset className="flex flex-col gap-4">
                 <legend className="mb-2 text-sm font-semibold">Kelistrikan</legend>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <SelectField
-                    id="daya_va"
-                    label="Daya terpasang"
-                    value={form.daya_va}
-                    options={DAYA_OPTS}
-                    onChange={(v) => set("daya_va", v)}
-                    error={showErr("daya_va")}
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="daya_va">Daya terpasang</Label>
+                    <Select
+                      value={form.daya_va != null ? String(form.daya_va) : null}
+                      onValueChange={(v) =>
+                        set("daya_va", v ? (Number(v) as DayaVA) : null)
+                      }
+                    >
+                      <SelectTrigger
+                        id="daya_va"
+                        className="w-full"
+                        aria-invalid={!!showErr("daya_va")}
+                      >
+                        <SelectValue>
+                          {form.daya_va != null ? `${form.daya_va} VA` : "Pilih…"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DAYA_OPTS.map((o) => (
+                          <SelectItem key={o} value={String(o)}>
+                            {o} VA
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {showErr("daya_va") && (
+                      <p className="text-xs text-destructive">{showErr("daya_va")}</p>
+                    )}
+                  </div>
                   <SelectField
                     id="golongan_tarif"
                     label="Golongan tarif"

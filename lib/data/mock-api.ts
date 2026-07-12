@@ -1,45 +1,15 @@
-// Mock "backend" — bentuk hasil mengikuti kontrak API Flask (PRD Bagian 15).
-// Saat integrasi M8+, isi fungsi-fungsi ini diganti fetch() ke Flask; pemanggil tidak berubah.
+// Fallback offline untuk halaman training bila server model (app.py) tak terjangkau.
+// Jalur utama prediksi/training/evaluasi kini memakai API nyata lewat lib/data/api.ts;
+// fungsi di sini hanya dipakai agar demo tidak buntu saat Flask tidak berjalan.
 
 import { FEATURE_LABELS } from "@/lib/data/seed"
 import type {
   ConfusionMatrix,
-  CustomerRow,
   Dataset,
   FeatureImportance,
-  Label,
   LightGBMParams,
   Model,
-  PredictionResultRow,
 } from "@/lib/types"
-
-/** Heuristik dummy: nilai "layak" dari fitur sosial-ekonomi & kelistrikan (0–1). */
-export function scoreRow(row: CustomerRow): number {
-  let s = 0.5
-  if (row.penghasilan < 1_000_000) s += 0.22
-  else if (row.penghasilan < 2_000_000) s += 0.12
-  else if (row.penghasilan > 4_000_000) s -= 0.3
-  else s -= 0.12
-  if (row.status_bansos !== "Tidak Menerima") s += 0.18
-  if (row.daya_va === "450 VA") s += 0.08
-  if (row.golongan_tarif === "R-1M/900 VA") s -= 0.15
-  if (row.luas_bangunan < 45) s += 0.07
-  else if (row.luas_bangunan > 90) s -= 0.12
-  if (row.pemakaian_kwh < 80) s += 0.05
-  else if (row.pemakaian_kwh > 150) s -= 0.08
-  if (row.jumlah_anggota >= 5) s += 0.04
-  if (row.pekerjaan === "PNS" || row.pekerjaan === "Karyawan Swasta") s -= 0.08
-  if (row.status_rumah === "Menumpang") s += 0.04
-  return Math.min(0.98, Math.max(0.02, s))
-}
-
-/** Prediksi satu baris → label + confidence (70–98%). */
-export function predictRow(row: CustomerRow): PredictionResultRow {
-  const s = scoreRow(row)
-  const label: Label = s >= 0.5 ? "Layak" : "Tidak Layak"
-  const confidence = Math.min(0.98, Math.max(0.7, label === "Layak" ? s + 0.25 : 1.05 - s))
-  return { id_pelanggan: row.id_pelanggan, input: row, label, confidence }
-}
 
 /** Hasil evaluasi dummy realistis & konsisten dengan 20% data uji dataset. */
 export function generateEvaluation(

@@ -5,23 +5,37 @@ export type DatasetStatus = "belum_diproses" | "sudah_preprocessing"
 
 export type Label = "Layak" | "Tidak Layak"
 
+// Kategori mengikuti nilai aktual dataset model (Model/Data/Dataset Subsidi Listrik.xlsx),
+// bukan asumsi — agar payload form manual = kategori yang dikenal LightGBM (encoder di app.py).
 export type Pekerjaan =
+  | "ASN"
+  | "PNS"
+  | "Dosen"
+  | "Dokter"
+  | "Guru Honorer"
+  | "Manajer"
+  | "Pengusaha"
+  | "Wiraswasta"
+  | "Karyawan Swasta"
+  | "Teknisi"
+  | "Pedagang Kecil"
+  | "Penjahit"
+  | "Sopir"
+  | "Satpam"
   | "Petani"
   | "Nelayan"
-  | "Buruh"
-  | "Wiraswasta"
-  | "PNS"
-  | "Karyawan Swasta"
-  | "Tidak Bekerja"
-  | "Lainnya"
+  | "Tukang Bangunan"
+  | "Buruh Harian Lepas"
+  | "Pemulung"
 
-export type StatusRumah = "Milik Sendiri" | "Sewa/Kontrak" | "Menumpang"
+export type StatusRumah = "Milik Sendiri" | "Kontrak" | "Menumpang"
 
-export type StatusBansos = "PKH" | "BPNT" | "PKH & BPNT" | "Tidak Menerima"
+export type StatusBansos = "PKH" | "BPNT" | "PKH & BPNT" | "Tidak"
 
-export type DayaVA = "450 VA" | "900 VA"
+/** Daya terpasang (VA) — angka mentah sesuai kolom dataset. */
+export type DayaVA = 450 | 900 | 1300 | 2200
 
-export type GolonganTarif = "R-1/450 VA" | "R-1/900 VA" | "R-1M/900 VA"
+export type GolonganTarif = "R-1/450" | "R-1/900" | "R-1/1300" | "R-1/2200"
 
 /** Satu baris data pelanggan — 9 fitur Data Dictionary (PRD Bagian 10) + label. */
 export interface CustomerRow {

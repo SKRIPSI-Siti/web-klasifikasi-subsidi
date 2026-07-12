@@ -149,7 +149,7 @@ export default function HasilPrediksiPage() {
                       ["Status rumah", single.input.status_rumah],
                       ["Luas bangunan", `${single.input.luas_bangunan} m²`],
                       ["Status bansos", single.input.status_bansos],
-                      ["Daya terpasang", single.input.daya_va],
+                      ["Daya terpasang", `${single.input.daya_va} VA`],
                       ["Golongan tarif", single.input.golongan_tarif],
                       ["Pemakaian / bulan", `${single.input.pemakaian_kwh} kWh`],
                     ] as [string, string][]

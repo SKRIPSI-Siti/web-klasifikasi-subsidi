@@ -1,12 +1,23 @@
 # Sistem Klasifikasi Kelayakan Penerima Subsidi Listrik — PLN Aceh
 
-Kerangka UI (MVP) untuk sistem klasifikasi kelayakan penerima subsidi listrik rumah tangga
-menggunakan **LightGBM**. Tahap ini seluruh backend **di-mock di frontend** (dummy data
-terpusat); integrasi Flask + Supabase menyusul pada fase M8+.
+Kerangka UI untuk sistem klasifikasi kelayakan penerima subsidi listrik rumah tangga
+menggunakan **LightGBM**. Operasi ML (preprocessing, training, evaluasi, prediksi) kini
+**terhubung ke API model Flask** (`../Model/app.py`); integrasi Supabase menyusul pada M9.
+Bila server model tidak berjalan, aplikasi otomatis jatuh ke simulasi lokal agar demo tetap
+jalan.
 
 Referensi: `Dokumen/PRD.md` (kebutuhan) dan `Dokumen/MVP.md` (milestone).
 
 ## Menjalankan
+
+**1. Jalankan API model** (terminal terpisah, dari folder `../Model`):
+
+```bash
+pip install -r requirements.txt   # sekali saja
+python app.py                     # http://localhost:5000
+```
+
+**2. Jalankan web:**
 
 ```bash
 npm install
@@ -14,6 +25,21 @@ npm run dev
 ```
 
 Buka http://localhost:3000 — otomatis diarahkan ke halaman login.
+
+### Menghubungkan ke API model
+
+Base URL API dibaca dari env `NEXT_PUBLIC_API_BASE_URL` (default `http://localhost:5000`).
+Untuk mengarahkan ke host/port lain, buat `.env.local`:
+
+```
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+```
+
+Seluruh akses backend nyata terpusat di `lib/data/api.ts`. Datasets & models disinkronkan
+dari API saat aplikasi dimuat; riwayat prediksi/laporan/aktivitas tetap dipersist lokal
+(`localStorage`) karena API model belum menyimpannya (menyusul saat integrasi Supabase).
+Kategori fitur pada form (pekerjaan, daya, golongan tarif, dst.) telah **diselaraskan dengan
+nilai asli dataset** model agar payload prediksi dikenali LightGBM.
 
 ## Kredensial dummy
 

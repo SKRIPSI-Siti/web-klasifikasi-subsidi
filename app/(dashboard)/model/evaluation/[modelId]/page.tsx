@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import * as api from "@/lib/data/api"
 import { useStore } from "@/lib/data/store"
 import { formatNumber, formatPercent } from "@/lib/format"
 import { IconCircleCheck, IconMoodConfuzed } from "@tabler/icons-react"
@@ -63,7 +64,7 @@ function MatrixCell({
 
 export default function ModelEvaluationPage() {
   const { modelId } = useParams<{ modelId: string }>()
-  const { state, hydrated, dispatch, addActivity } = useStore()
+  const { state, hydrated, dispatch, addActivity, syncFromApi } = useStore()
   const model = state.models.find((m) => m.id === modelId)
   const dataset = state.datasets.find((d) => d.id === model?.dataset_id)
 
@@ -90,11 +91,17 @@ export default function ModelEvaluationPage() {
   const maxCell = Math.max(tp, tn, fp, fn)
   const testTotal = tp + tn + fp + fn
 
-  function activate() {
+  async function activate() {
     if (!model) return
-    dispatch({ type: "setActiveModel", id: model.id })
+    dispatch({ type: "setActiveModel", id: model.id }) // umpan balik langsung
     addActivity("training", `${model.nama} dijadikan model aktif`)
     toast.success(`${model.nama} kini menjadi model aktif.`)
+    try {
+      await api.activateModel(model.id)
+      void syncFromApi()
+    } catch {
+      // Model lokal (belum ada di server) — status aktif tetap tersimpan di store lokal.
+    }
   }
 
   return (

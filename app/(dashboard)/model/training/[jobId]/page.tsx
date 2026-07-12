@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
+import * as api from "@/lib/data/api"
 import { generateEvaluation, TRAINING_LOG_STEPS } from "@/lib/data/mock-api"
 import { generateId, useStore } from "@/lib/data/store"
 import { formatPercent } from "@/lib/format"
@@ -22,7 +23,7 @@ import { IconArrowRight, IconMoodConfuzed } from "@tabler/icons-react"
 
 export default function TrainingProgressPage() {
   const { jobId } = useParams<{ jobId: string }>()
-  const { state, hydrated, dispatch, addActivity } = useStore()
+  const { state, hydrated, dispatch, addActivity, syncFromApi } = useStore()
   const job = state.jobs.find((j) => j.id === jobId)
   const dataset = state.datasets.find((d) => d.id === job?.dataset_id)
   const model = state.models.find((m) => m.id === job?.model_id)
@@ -34,21 +35,55 @@ export default function TrainingProgressPage() {
   React.useEffect(() => {
     if (!hydrated || !job || !dataset || job.model_id || startedRef.current) return
     startedRef.current = true
+    let cancelled = false
 
-    const steps = TRAINING_LOG_STEPS(job.parameter.n_estimators)
-    const stepMs = 700
-    steps.forEach((line, i) => {
-      window.setTimeout(() => {
-        setLogs((prev) => [...prev, line])
-        setProgress(Math.round(((i + 1) / steps.length) * 100))
-        if (i === steps.length - 1) {
-          const newModel = generateEvaluation(dataset, job.parameter, generateId("mdl"))
-          dispatch({ type: "finishJob", jobId: job.id, model: newModel })
-          addActivity("training", `Model ${newModel.nama} selesai dilatih`)
+    /** Fallback: simulasi lokal bila server model tak terjangkau (demo tetap jalan). */
+    function runMockFallback() {
+      const steps = TRAINING_LOG_STEPS(job!.parameter.n_estimators)
+      steps.forEach((line, i) => {
+        window.setTimeout(() => {
+          if (cancelled) return
+          setLogs((prev) => [...prev, line])
+          setProgress(Math.round(((i + 1) / steps.length) * 100))
+          if (i === steps.length - 1) {
+            const newModel = generateEvaluation(dataset!, job!.parameter, generateId("mdl"))
+            dispatch({ type: "finishJob", jobId: job!.id, model: newModel })
+            addActivity("training", `Model ${newModel.nama} selesai dilatih`)
+          }
+        }, i * 700)
+      })
+    }
+
+    async function runRealTraining() {
+      try {
+        const { job_id } = await api.train(dataset!.id, job!.parameter)
+        // Polling status sampai selesai/gagal.
+        while (!cancelled) {
+          const status = await api.getTrainStatus(job_id)
+          setProgress(status.progress)
+          setLogs(status.log)
+          if (status.status === "done" && status.model_id) {
+            const newModel = await api.getModelById(status.model_id)
+            if (cancelled) return
+            dispatch({ type: "finishJob", jobId: job!.id, model: newModel })
+            addActivity("training", `Model ${newModel.nama} selesai dilatih`)
+            void syncFromApi()
+            return
+          }
+          if (status.status === "failed") throw new api.ApiError("Training gagal di server model.")
+          await new Promise((r) => setTimeout(r, 600))
         }
-      }, i * stepMs)
-    })
-  }, [hydrated, job, dataset, dispatch, addActivity])
+      } catch {
+        // Server tak terjangkau / dataset lokal belum ada di server → pakai simulasi.
+        if (!cancelled) runMockFallback()
+      }
+    }
+
+    void runRealTraining()
+    return () => {
+      cancelled = true
+    }
+  }, [hydrated, job, dataset, dispatch, addActivity, syncFromApi])
 
   if (!hydrated) {
     return (

@@ -14,20 +14,40 @@ import type {
   StatusRumah,
 } from "@/lib/types"
 
-const PEKERJAAN: Pekerjaan[] = [
+// Pekerjaan yang cenderung "Layak" (sosial-ekonomi rendah) vs "Tidak Layak".
+const PEKERJAAN_LAYAK: Pekerjaan[] = [
   "Petani",
   "Nelayan",
-  "Buruh",
-  "Wiraswasta",
-  "PNS",
-  "Karyawan Swasta",
-  "Tidak Bekerja",
-  "Lainnya",
+  "Buruh Harian Lepas",
+  "Pemulung",
+  "Tukang Bangunan",
+  "Pedagang Kecil",
+  "Penjahit",
+  "Sopir",
+  "Satpam",
+  "Guru Honorer",
 ]
-const STATUS_RUMAH: StatusRumah[] = ["Milik Sendiri", "Sewa/Kontrak", "Menumpang"]
-const STATUS_BANSOS: StatusBansos[] = ["PKH", "BPNT", "PKH & BPNT", "Tidak Menerima"]
-const DAYA: DayaVA[] = ["450 VA", "900 VA"]
-const TARIF: GolonganTarif[] = ["R-1/450 VA", "R-1/900 VA", "R-1M/900 VA"]
+const PEKERJAAN_NON: Pekerjaan[] = [
+  "ASN",
+  "PNS",
+  "Dosen",
+  "Dokter",
+  "Manajer",
+  "Pengusaha",
+  "Wiraswasta",
+  "Karyawan Swasta",
+  "Teknisi",
+]
+const STATUS_RUMAH: StatusRumah[] = ["Milik Sendiri", "Kontrak", "Menumpang"]
+const STATUS_BANSOS: StatusBansos[] = ["PKH", "BPNT", "PKH & BPNT", "Tidak"]
+const DAYA_LAYAK: DayaVA[] = [450, 900]
+const DAYA_NON: DayaVA[] = [1300, 2200]
+const TARIF_BY_DAYA: Record<DayaVA, GolonganTarif> = {
+  450: "R-1/450",
+  900: "R-1/900",
+  1300: "R-1/1300",
+  2200: "R-1/2200",
+}
 
 /** PRNG deterministik (mulberry32) agar seed stabil. */
 function mulberry32(a: number) {
@@ -50,20 +70,21 @@ export function generateRows(seedNum: number, count: number, prefix: string): Cu
       ? Math.round((500_000 + rand() * 1_800_000) / 50_000) * 50_000
       : Math.round((2_500_000 + rand() * 5_000_000) / 50_000) * 50_000
     const label: Label = layak ? "Layak" : "Tidak Layak"
+    const daya_va: DayaVA = layak
+      ? DAYA_LAYAK[Math.floor(rand() * DAYA_LAYAK.length)]
+      : DAYA_NON[Math.floor(rand() * DAYA_NON.length)]
     rows.push({
       id_pelanggan: `${prefix}${String(i + 1).padStart(4, "0")}`,
       penghasilan,
       jumlah_anggota: 1 + Math.floor(rand() * 8),
       pekerjaan: layak
-        ? PEKERJAAN[Math.floor(rand() * 4)] // petani/nelayan/buruh/wiraswasta lebih sering
-        : PEKERJAAN[3 + Math.floor(rand() * 3)],
+        ? PEKERJAAN_LAYAK[Math.floor(rand() * PEKERJAAN_LAYAK.length)]
+        : PEKERJAAN_NON[Math.floor(rand() * PEKERJAAN_NON.length)],
       status_rumah: STATUS_RUMAH[Math.floor(rand() * (layak ? 3 : 2))],
       luas_bangunan: layak ? 21 + Math.floor(rand() * 40) : 45 + Math.floor(rand() * 120),
-      status_bansos: layak
-        ? STATUS_BANSOS[Math.floor(rand() * 3)]
-        : "Tidak Menerima",
-      daya_va: layak ? DAYA[Math.floor(rand() * 2)] : "900 VA",
-      golongan_tarif: layak ? TARIF[Math.floor(rand() * 2)] : TARIF[1 + Math.floor(rand() * 2)],
+      status_bansos: layak ? STATUS_BANSOS[Math.floor(rand() * 3)] : "Tidak",
+      daya_va,
+      golongan_tarif: TARIF_BY_DAYA[daya_va],
       pemakaian_kwh: layak ? 30 + Math.floor(rand() * 90) : 90 + Math.floor(rand() * 200),
       label,
     })

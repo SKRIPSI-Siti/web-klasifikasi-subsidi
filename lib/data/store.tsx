@@ -6,6 +6,7 @@
 
 import * as React from "react"
 
+import * as api from "@/lib/data/api"
 import {
   seedActivities,
   seedDatasets,
@@ -45,6 +46,7 @@ const STORAGE_KEY = "klasifikasi-subsidi-store-v1"
 
 type Action =
   | { type: "hydrate"; state: AppState }
+  | { type: "syncFromApi"; datasets?: Dataset[]; models?: Model[] }
   | { type: "addDataset"; dataset: Dataset }
   | { type: "deleteDataset"; id: string }
   | { type: "setDatasetStatus"; id: string; status: Dataset["status"] }
@@ -60,6 +62,24 @@ function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "hydrate":
       return action.state
+    case "syncFromApi": {
+      // Model = sumber kebenaran dari API (jika ada). Dataset di-upsert: pertahankan baris
+      // preview & dataset lokal (hasil upload) yang belum dikenal API.
+      let datasets = state.datasets
+      if (action.datasets) {
+        const byId = new Map(datasets.map((d) => [d.id, d]))
+        for (const d of action.datasets) {
+          const existing = byId.get(d.id)
+          byId.set(d.id, existing ? { ...existing, ...d, rows: existing.rows } : d)
+        }
+        datasets = Array.from(byId.values())
+      }
+      return {
+        ...state,
+        datasets,
+        models: action.models && action.models.length > 0 ? action.models : state.models,
+      }
+    }
     case "addDataset":
       return { ...state, datasets: [action.dataset, ...state.datasets] }
     case "deleteDataset":
@@ -112,8 +132,12 @@ function reducer(state: AppState, action: Action): AppState {
 interface StoreContextValue {
   state: AppState
   hydrated: boolean
+  /** null = belum dicoba, true = API model terjangkau, false = offline (pakai data lokal). */
+  apiOnline: boolean | null
   dispatch: React.Dispatch<Action>
   addActivity: (jenis: ActivityKind, deskripsi: string) => void
+  /** Ambil ulang datasets & models dari API dan sinkronkan ke store (best-effort). */
+  syncFromApi: () => Promise<void>
 }
 
 const StoreContext = React.createContext<StoreContextValue | null>(null)
@@ -127,6 +151,31 @@ export function generateId(prefix: string) {
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = React.useReducer(reducer, initialState)
   const [hydrated, setHydrated] = React.useState(false)
+  const [apiOnline, setApiOnline] = React.useState<boolean | null>(null)
+
+  const syncFromApi = React.useCallback(async () => {
+    try {
+      const [apiDatasets, apiModels] = await Promise.all([
+        api.getDatasets(),
+        api.getModels(),
+      ])
+      // ApiDataset → Dataset (rows preview diisi oleh store lewat upsert bila sudah ada lokal).
+      const datasets: Dataset[] = apiDatasets.map((d) => ({
+        id: d.id,
+        nama_file: d.nama_file,
+        jumlah_baris: d.jumlah_baris,
+        jumlah_kolom: d.jumlah_kolom,
+        status: d.status,
+        uploaded_at: new Date().toISOString(),
+        rows: [],
+      }))
+      dispatch({ type: "syncFromApi", datasets, models: apiModels })
+      setApiOnline(true)
+    } catch {
+      // API tidak terjangkau → tetap pakai seed lokal (demo offline tetap jalan).
+      setApiOnline(false)
+    }
+  }, [])
 
   React.useEffect(() => {
     // Sinkronisasi satu kali dari sistem eksternal (localStorage) saat mount —
@@ -155,6 +204,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state, hydrated])
 
+  // Setelah hydrate, sinkronkan datasets & models dari API model (best-effort, sekali).
+  // setState di dalam syncFromApi terjadi setelah await (asinkron), bukan render bertingkat.
+  React.useEffect(() => {
+    if (!hydrated) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void syncFromApi()
+  }, [hydrated, syncFromApi])
+
   const addActivity = React.useCallback((jenis: ActivityKind, deskripsi: string) => {
     dispatch({
       type: "addActivity",
@@ -168,8 +225,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const value = React.useMemo(
-    () => ({ state, hydrated, dispatch, addActivity }),
-    [state, hydrated, addActivity]
+    () => ({ state, hydrated, apiOnline, dispatch, addActivity, syncFromApi }),
+    [state, hydrated, apiOnline, addActivity, syncFromApi]
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

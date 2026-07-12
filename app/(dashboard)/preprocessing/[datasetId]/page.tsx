@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import * as api from "@/lib/data/api"
 import { useStore } from "@/lib/data/store"
 import { formatNumber } from "@/lib/format"
 import type { StepStatus } from "@/lib/types"
@@ -32,6 +33,7 @@ import {
   IconDatabaseOff,
   IconPlayerPlay,
 } from "@tabler/icons-react"
+import { toast } from "sonner"
 
 const STEPS = [
   {
@@ -61,39 +63,67 @@ const STEPS = [
   },
 ] as const
 
+interface Ringkasan {
+  baris_valid: number
+  layak: number
+  tidak: number
+}
+
 export default function PreprocessingDetailPage() {
   const { datasetId } = useParams<{ datasetId: string }>()
-  const { state, hydrated, dispatch, addActivity } = useStore()
+  const { state, hydrated, dispatch, addActivity, syncFromApi } = useStore()
   const dataset = state.datasets.find((d) => d.id === datasetId)
 
   const [statuses, setStatuses] = React.useState<StepStatus[]>(
     Array(STEPS.length).fill("pending")
   )
   const [running, setRunning] = React.useState(false)
+  const [ringkasan, setRingkasan] = React.useState<Ringkasan | null>(null)
   const alreadyDone = dataset?.status === "sudah_preprocessing"
   const finished = alreadyDone || statuses.every((s) => s === "done")
 
-  function run() {
+  async function run() {
     if (running || !dataset) return
     setRunning(true)
+
+    // Jalankan preprocessing sungguhan di server model; bila gagal (offline / dataset lokal
+    // yang belum ada di server), animasi tetap jalan memakai ringkasan estimasi lokal.
+    let hasil: Ringkasan | null = null
+    try {
+      const res = await api.preprocess(dataset.id)
+      hasil = {
+        baris_valid: res.ringkasan.baris_valid,
+        layak: res.ringkasan.distribusi_label.Layak,
+        tidak: res.ringkasan.distribusi_label["Tidak Layak"],
+      }
+    } catch (e) {
+      toast.info(
+        e instanceof api.ApiError && e.code !== "network_error"
+          ? "Dataset ini belum ada di server model — memakai ringkasan estimasi."
+          : "Server model tidak terjangkau — memakai ringkasan estimasi lokal."
+      )
+    }
+
     STEPS.forEach((_, i) => {
       window.setTimeout(() => {
         setStatuses((prev) => prev.map((s, j) => (j === i ? "running" : s)))
-      }, i * 1000)
+      }, i * 700)
       window.setTimeout(
         () => {
           setStatuses((prev) => prev.map((s, j) => (j === i ? "done" : s)))
           if (i === STEPS.length - 1) {
             setRunning(false)
+            if (hasil) setRingkasan(hasil)
             dispatch({
               type: "setDatasetStatus",
               id: dataset.id,
               status: "sudah_preprocessing",
             })
             addActivity("preprocessing", `Preprocessing ${dataset.nama_file} selesai`)
+            void syncFromApi()
           }
         },
-        i * 1000 + 950
+        i * 700 + 650
       )
     })
   }
@@ -117,10 +147,10 @@ export default function PreprocessingDetailPage() {
     )
   }
 
-  // Ringkasan dummy konsisten dengan seed: 60% Layak : 40% Tidak Layak, ± 4% baris gugur
-  const barisValid = Math.round(dataset.jumlah_baris * 0.96)
-  const layak = Math.round(barisValid * 0.6)
-  const tidakLayak = barisValid - layak
+  // Angka nyata dari server model bila tersedia; jika tidak, estimasi lokal (60:40, ±4% gugur).
+  const barisValid = ringkasan?.baris_valid ?? Math.round(dataset.jumlah_baris * 0.96)
+  const layak = ringkasan?.layak ?? Math.round(barisValid * 0.6)
+  const tidakLayak = ringkasan?.tidak ?? barisValid - layak
 
   const steps: StepperStep[] = STEPS.map((s, i) => ({
     ...s,
