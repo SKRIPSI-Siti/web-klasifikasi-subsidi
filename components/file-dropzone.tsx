@@ -16,7 +16,13 @@ interface FileDropzoneProps {
 }
 
 /** Dropzone drag-and-drop + file picker dengan validasi ekstensi (FR-B2). */
-export function FileDropzone({ accept, file, onFile, error, onError }: FileDropzoneProps) {
+export function FileDropzone({
+  accept,
+  file,
+  onFile,
+  error,
+  onError,
+}: FileDropzoneProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = React.useState(false)
 
@@ -76,7 +82,9 @@ export function FileDropzone({ accept, file, onFile, error, onError }: FileDropz
         }}
         className={cn(
           "flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-10 text-center transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30",
-          dragging ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50",
+          dragging
+            ? "border-primary bg-primary/5"
+            : "border-border hover:bg-muted/50",
           error && "border-destructive"
         )}
       >

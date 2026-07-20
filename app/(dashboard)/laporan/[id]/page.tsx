@@ -6,7 +6,6 @@ import { useParams } from "next/navigation"
 
 import { LabelBadge } from "@/components/dataset-status-badge"
 import { EmptyState } from "@/components/empty-state"
-import { StatCard } from "@/components/stat-card"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -40,15 +39,22 @@ import {
   formatRupiah,
 } from "@/lib/format"
 import { IconDownload, IconMoodConfuzed } from "@tabler/icons-react"
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts"
+import {
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+} from "recharts"
 import { toast } from "sonner"
 
 export default function LaporanDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { state, hydrated } = useStore()
   const report = state.reports.find((r) => r.id === id)
-  const prediction = state.predictions.find((p) => p.id === report?.prediction_id)
-  const model = state.models.find((m) => m.id === report?.model_id)
+  const prediction = state.predictions.find(
+    (p) => p.id === report?.prediction_id
+  )
 
   if (!hydrated) {
     return (
@@ -64,7 +70,9 @@ export default function LaporanDetailPage() {
       <EmptyState
         icon={<IconMoodConfuzed />}
         title="Laporan tidak ditemukan"
-        action={<Button render={<Link href="/laporan" />}>Ke Daftar Laporan</Button>}
+        action={
+          <Button render={<Link href="/laporan" />}>Ke Daftar Laporan</Button>
+        }
       />
     )
   }
@@ -79,11 +87,15 @@ export default function LaporanDetailPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href="/laporan" />}>Laporan</BreadcrumbLink>
+            <BreadcrumbLink render={<Link href="/laporan" />}>
+              Laporan
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="max-w-96 truncate">{report.judul}</BreadcrumbPage>
+            <BreadcrumbPage className="max-w-96 truncate">
+              {report.judul}
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -92,7 +104,7 @@ export default function LaporanDetailPage() {
         <div>
           <h2 className="text-xl font-semibold">{report.judul}</h2>
           <p className="text-sm text-muted-foreground">
-            {formatDateTime(report.created_at)} · model: {model?.nama ?? "—"}
+            {formatDateTime(report.created_at)}
           </p>
         </div>
         <Button
@@ -103,15 +115,6 @@ export default function LaporanDetailPage() {
           Export PDF
         </Button>
       </div>
-
-      {model && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 @4xl/main:grid-cols-4">
-          <StatCard label="Accuracy" value={formatPercent(model.accuracy)} />
-          <StatCard label="Precision" value={formatPercent(model.precision_)} />
-          <StatCard label="Recall" value={formatPercent(model.recall)} />
-          <StatCard label="F1-Score" value={formatPercent(model.f1_score)} />
-        </div>
-      )}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_2fr]">
         <Card>
@@ -178,7 +181,9 @@ export default function LaporanDetailPage() {
                 <TableBody>
                   {prediction.hasil.map((h) => (
                     <TableRow key={h.id_pelanggan}>
-                      <TableCell className="font-mono text-xs">{h.id_pelanggan}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {h.id_pelanggan}
+                      </TableCell>
                       <TableCell>{formatRupiah(h.input.penghasilan)}</TableCell>
                       <TableCell>{h.input.daya_va}</TableCell>
                       <TableCell>

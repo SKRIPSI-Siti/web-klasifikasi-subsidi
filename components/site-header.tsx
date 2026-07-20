@@ -7,14 +7,9 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const TITLES: [string, string][] = [
   ["/dashboard", "Dashboard"],
-  ["/dataset/upload", "Upload Dataset"],
-  ["/dataset", "Dataset"],
-  ["/preprocessing", "Preprocessing"],
-  ["/model/training", "Training Model"],
-  ["/model/evaluation", "Evaluasi Model"],
-  ["/prediksi/baru", "Prediksi Baru"],
-  ["/prediksi/hasil", "Hasil Prediksi"],
-  ["/prediksi", "Prediksi"],
+  ["/klasifikasi/baru", "Klasifikasi Baru"],
+  ["/klasifikasi/hasil", "Hasil Klasifikasi"],
+  ["/klasifikasi", "Klasifikasi"],
   ["/laporan", "Laporan"],
   ["/pengaturan", "Pengaturan"],
 ]

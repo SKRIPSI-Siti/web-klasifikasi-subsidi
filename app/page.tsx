@@ -33,7 +33,7 @@ const MARQUEE_ITEMS = [
   "Confusion Matrix",
   "Feature Importance",
   "Preprocessing Otomatis",
-  "Prediksi Batch",
+  "Klasifikasi Batch",
 ]
 
 const STEPS = [
@@ -54,7 +54,7 @@ const STEPS = [
   },
   {
     no: "04",
-    title: "Prediksi & Laporan",
+    title: "Klasifikasi & Laporan",
     desc: "Klasifikasikan pelanggan lalu simpan hasilnya sebagai laporan.",
   },
 ]
@@ -101,20 +101,27 @@ export default function LandingPage() {
             </BlurFade>
             <BlurFade delay={200}>
               <p className="max-w-2xl text-balance text-muted-foreground">
-                Sistem klasifikasi kelayakan penerima subsidi listrik rumah tangga
-                pelanggan PLN Aceh menggunakan metode{" "}
+                Sistem klasifikasi kelayakan penerima subsidi listrik rumah
+                tangga pelanggan PLN Aceh menggunakan metode{" "}
                 <span className="font-medium text-foreground">
                   Light Gradient Boosting Machine (LightGBM)
                 </span>{" "}
                 — dari import data hingga laporan hasil, dalam satu alur.
               </p>
             </BlurFade>
-            <BlurFade delay={300} className="flex flex-wrap items-center justify-center gap-3">
+            <BlurFade
+              delay={300}
+              className="flex flex-wrap items-center justify-center gap-3"
+            >
               <ShimmerButton href="/login">
                 <IconWand className="size-4" />
                 Mulai Klasifikasi
               </ShimmerButton>
-              <Button variant="outline" size="lg" render={<Link href="/login" />}>
+              <Button
+                variant="outline"
+                size="lg"
+                render={<Link href="/login" />}
+              >
                 Lihat Dashboard
               </Button>
             </BlurFade>
@@ -142,13 +149,32 @@ export default function LandingPage() {
           <div className="mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-4 py-12 text-center sm:grid-cols-4">
             {[
               { value: 93.2, suffix: "%", decimals: 1, label: "Akurasi model" },
-              { value: 9, suffix: "", decimals: 0, label: "Variabel klasifikasi" },
-              { value: 2000, suffix: "+", decimals: 0, label: "Data pelanggan diuji" },
-              { value: 5, suffix: "", decimals: 0, label: "Tahap preprocessing" },
+              {
+                value: 9,
+                suffix: "",
+                decimals: 0,
+                label: "Variabel klasifikasi",
+              },
+              {
+                value: 2000,
+                suffix: "+",
+                decimals: 0,
+                label: "Data pelanggan diuji",
+              },
+              {
+                value: 5,
+                suffix: "",
+                decimals: 0,
+                label: "Tahap preprocessing",
+              },
             ].map((s) => (
               <div key={s.label} className="flex flex-col gap-1">
                 <p className="text-3xl font-bold text-primary">
-                  <NumberTicker value={s.value} suffix={s.suffix} decimals={s.decimals} />
+                  <NumberTicker
+                    value={s.value}
+                    suffix={s.suffix}
+                    decimals={s.decimals}
+                  />
                 </p>
                 <p className="text-sm text-muted-foreground">{s.label}</p>
               </div>
@@ -163,14 +189,14 @@ export default function LandingPage() {
               Satu alur, dari data mentah sampai keputusan
             </h2>
             <p className="max-w-xl text-muted-foreground">
-              Seluruh fungsi sistem pada perancangan skripsi terwakili dalam antarmuka
-              yang runtut dan mudah dipakai petugas non-teknis.
+              Seluruh fungsi sistem pada perancangan skripsi terwakili dalam
+              antarmuka yang runtut dan mudah dipakai petugas non-teknis.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <BentoCard
               icon={<IconWand />}
-              title="Prediksi Manual & Batch"
+              title="Klasifikasi Manual & Batch"
               description="Klasifikasikan satu pelanggan lewat form 9 variabel, atau ribuan pelanggan sekaligus dari file CSV — lengkap dengan confidence score."
               className="sm:col-span-2 lg:col-span-2"
             >
@@ -201,7 +227,7 @@ export default function LandingPage() {
             <BentoCard
               icon={<IconFileAnalytics />}
               title="Evaluasi Transparan"
-              description="Confusion matrix dan feature importance menjelaskan alasan di balik prediksi."
+              description="Confusion matrix dan feature importance menjelaskan alasan di balik klasifikasi."
             />
             <BentoCard
               icon={<IconReport />}
@@ -224,8 +250,11 @@ export default function LandingPage() {
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((step) => (
-                <div key={step.no} className="relative flex flex-col gap-2 rounded-3xl border bg-card p-6">
-                  <span className="text-sm font-mono font-semibold text-primary">
+                <div
+                  key={step.no}
+                  className="relative flex flex-col gap-2 rounded-3xl border bg-card p-6"
+                >
+                  <span className="font-mono text-sm font-semibold text-primary">
                     {step.no}
                   </span>
                   <h3 className="font-semibold">{step.title}</h3>
@@ -245,7 +274,8 @@ export default function LandingPage() {
               <AnimatedGradientText>lebih tepat sasaran</AnimatedGradientText>?
             </h2>
             <p className="text-muted-foreground">
-              Masuk sebagai admin dan jalankan klasifikasi pertama dalam hitungan menit.
+              Masuk sebagai admin dan jalankan klasifikasi pertama dalam
+              hitungan menit.
             </p>
             <ShimmerButton href="/login">
               Masuk ke Sistem

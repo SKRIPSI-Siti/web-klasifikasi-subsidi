@@ -64,7 +64,7 @@ export function ShimmerButton({
     >
       <span
         aria-hidden
-        className="animate-shimmer pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,transparent_40%,rgba(255,255,255,0.35)_50%,transparent_60%)] bg-[length:200%_100%]"
+        className="pointer-events-none absolute inset-0 animate-shimmer bg-[linear-gradient(110deg,transparent_40%,rgba(255,255,255,0.35)_50%,transparent_60%)] bg-[length:200%_100%]"
       />
       {children}
     </a>
@@ -86,7 +86,7 @@ export function Marquee({
         className
       )}
     >
-      <div className="animate-marquee flex shrink-0 items-center gap-4 pr-4 group-hover:[animation-play-state:paused]">
+      <div className="flex shrink-0 animate-marquee items-center gap-4 pr-4 group-hover:[animation-play-state:paused]">
         {children}
         {children}
       </div>
@@ -100,7 +100,7 @@ export function GridPattern({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:44px_44px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]",
+        "pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)] bg-[size:44px_44px]",
         className
       )}
     />
@@ -180,7 +180,7 @@ export function BentoCard({
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 -right-24 size-48 rounded-full bg-primary/10 blur-3xl transition-opacity opacity-0 group-hover:opacity-100"
+        className="pointer-events-none absolute -top-24 -right-24 size-48 rounded-full bg-primary/10 opacity-0 blur-3xl transition-opacity group-hover:opacity-100"
       />
       {children}
       <div className="flex flex-col gap-2">

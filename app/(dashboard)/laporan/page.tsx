@@ -7,13 +7,6 @@ import { EmptyState } from "@/components/empty-state"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -29,7 +22,6 @@ import { IconReport } from "@tabler/icons-react"
 
 export default function LaporanPage() {
   const { state, hydrated } = useStore()
-  const [modelFilter, setModelFilter] = React.useState<string | null>(null)
   const [dateFrom, setDateFrom] = React.useState("")
   const [dateTo, setDateTo] = React.useState("")
 
@@ -43,10 +35,10 @@ export default function LaporanPage() {
   }
 
   const reports = state.reports.filter((r) => {
-    if (modelFilter && r.model_id !== modelFilter) return false
     const t = new Date(r.created_at).getTime()
     if (dateFrom && t < new Date(dateFrom).getTime()) return false
-    if (dateTo && t > new Date(dateTo).getTime() + 24 * 60 * 60 * 1000) return false
+    if (dateTo && t > new Date(dateTo).getTime() + 24 * 60 * 60 * 1000)
+      return false
     return true
   })
 
@@ -80,31 +72,10 @@ export default function LaporanPage() {
             className="w-40"
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <Label>Model</Label>
-          <Select value={modelFilter} onValueChange={(v) => setModelFilter(v as string | null)}>
-            <SelectTrigger className="w-56">
-              <SelectValue>
-                {modelFilter
-                  ? state.models.find((m) => m.id === modelFilter)?.nama
-                  : "Semua model"}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Semua model</SelectItem>
-              {state.models.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.nama}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        {(modelFilter || dateFrom || dateTo) && (
+        {(dateFrom || dateTo) && (
           <Button
             variant="ghost"
             onClick={() => {
-              setModelFilter(null)
               setDateFrom("")
               setDateTo("")
             }}
@@ -117,15 +88,21 @@ export default function LaporanPage() {
       {reports.length === 0 ? (
         <EmptyState
           icon={<IconReport />}
-          title={state.reports.length === 0 ? "Belum ada laporan" : "Tidak ada laporan yang cocok"}
+          title={
+            state.reports.length === 0
+              ? "Belum ada laporan"
+              : "Tidak ada laporan yang cocok"
+          }
           description={
             state.reports.length === 0
-              ? "Simpan hasil prediksi sebagai laporan dari halaman Hasil Prediksi."
-              : "Ubah rentang tanggal atau filter model."
+              ? "Simpan hasil klasifikasi sebagai laporan dari halaman Hasil Klasifikasi."
+              : "Ubah rentang tanggal."
           }
           action={
             state.reports.length === 0 ? (
-              <Button render={<Link href="/prediksi" />}>Ke Prediksi</Button>
+              <Button render={<Link href="/klasifikasi" />}>
+                Ke Klasifikasi
+              </Button>
             ) : undefined
           }
         />
@@ -136,7 +113,6 @@ export default function LaporanPage() {
               <TableRow>
                 <TableHead>Judul</TableHead>
                 <TableHead>Tanggal</TableHead>
-                <TableHead>Model</TableHead>
                 <TableHead>Jumlah data</TableHead>
                 <TableHead>Ringkasan hasil</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
@@ -144,20 +120,24 @@ export default function LaporanPage() {
             </TableHeader>
             <TableBody>
               {reports.map((r) => {
-                const prediction = state.predictions.find((p) => p.id === r.prediction_id)
-                const model = state.models.find((m) => m.id === r.model_id)
+                const prediction = state.predictions.find(
+                  (p) => p.id === r.prediction_id
+                )
                 return (
                   <TableRow key={r.id}>
-                    <TableCell className="max-w-72 truncate font-medium">{r.judul}</TableCell>
+                    <TableCell className="max-w-72 truncate font-medium">
+                      {r.judul}
+                    </TableCell>
                     <TableCell>{formatDate(r.created_at)}</TableCell>
-                    <TableCell className="max-w-48 truncate">{model?.nama ?? "—"}</TableCell>
                     <TableCell>
                       {prediction ? formatNumber(prediction.hasil.length) : "—"}
                     </TableCell>
                     <TableCell>
                       {prediction ? (
                         <>
-                          <span className="text-success">{prediction.jumlah_layak} Layak</span>
+                          <span className="text-success">
+                            {prediction.jumlah_layak} Layak
+                          </span>
                           {" / "}
                           <span className="text-destructive">
                             {prediction.jumlah_tidak} Tidak Layak

@@ -26,8 +26,7 @@ export default function PengaturanPage() {
 
   const errors = {
     oldPass: oldPass ? undefined : "Wajib diisi.",
-    newPass:
-      newPass.length >= 6 ? undefined : "Minimal 6 karakter.",
+    newPass: newPass.length >= 6 ? undefined : "Minimal 6 karakter.",
     confirmPass:
       confirmPass === newPass && confirmPass !== ""
         ? undefined
@@ -50,7 +49,9 @@ export default function PengaturanPage() {
     <div className="flex max-w-2xl flex-col gap-4">
       <div>
         <h2 className="text-xl font-semibold">Pengaturan</h2>
-        <p className="text-sm text-muted-foreground">Profil admin dan keamanan akun.</p>
+        <p className="text-sm text-muted-foreground">
+          Profil admin dan keamanan akun.
+        </p>
       </div>
 
       <Card>
@@ -82,7 +83,8 @@ export default function PengaturanPage() {
         <CardHeader>
           <CardTitle>Ganti Password</CardTitle>
           <CardDescription>
-            Fitur dummy — autentikasi nyata diaktifkan pada fase integrasi Supabase.
+            Fitur dummy — autentikasi nyata diaktifkan pada fase integrasi
+            Supabase.
           </CardDescription>
         </CardHeader>
         <CardContent>

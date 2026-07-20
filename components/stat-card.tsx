@@ -27,7 +27,9 @@ export function StatCard({ label, value, hint, action }: StatCardProps) {
         {action && <CardAction>{action}</CardAction>}
       </CardHeader>
       {hint && (
-        <CardFooter className="text-sm text-muted-foreground">{hint}</CardFooter>
+        <CardFooter className="text-sm text-muted-foreground">
+          {hint}
+        </CardFooter>
       )}
     </Card>
   )

@@ -23,10 +23,7 @@ export const config = {
   matcher: [
     "/login",
     "/dashboard/:path*",
-    "/dataset/:path*",
-    "/preprocessing/:path*",
-    "/model/:path*",
-    "/prediksi/:path*",
+    "/klasifikasi/:path*",
     "/laporan/:path*",
     "/pengaturan/:path*",
   ],

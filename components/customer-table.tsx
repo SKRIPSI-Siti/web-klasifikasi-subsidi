@@ -24,7 +24,11 @@ interface CustomerTableProps {
 }
 
 /** Tabel data pelanggan paginated — dipakai detail dataset & preview (FR-B5). */
-export function CustomerTable({ rows, pageSize = 10, showLabel = true }: CustomerTableProps) {
+export function CustomerTable({
+  rows,
+  pageSize = 10,
+  showLabel = true,
+}: CustomerTableProps) {
   const [page, setPage] = React.useState(0)
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize))
   const current = rows.slice(page * pageSize, (page + 1) * pageSize)
@@ -51,7 +55,9 @@ export function CustomerTable({ rows, pageSize = 10, showLabel = true }: Custome
           <TableBody>
             {current.map((row) => (
               <TableRow key={row.id_pelanggan}>
-                <TableCell className="font-mono text-xs">{row.id_pelanggan}</TableCell>
+                <TableCell className="font-mono text-xs">
+                  {row.id_pelanggan}
+                </TableCell>
                 <TableCell>{formatRupiah(row.penghasilan)}</TableCell>
                 <TableCell>{row.jumlah_anggota}</TableCell>
                 <TableCell>{row.pekerjaan}</TableCell>
@@ -62,7 +68,9 @@ export function CustomerTable({ rows, pageSize = 10, showLabel = true }: Custome
                 <TableCell>{row.golongan_tarif}</TableCell>
                 <TableCell>{formatNumber(row.pemakaian_kwh)}</TableCell>
                 {showLabel && (
-                  <TableCell>{row.label ? <LabelBadge label={row.label} /> : "—"}</TableCell>
+                  <TableCell>
+                    {row.label ? <LabelBadge label={row.label} /> : "—"}
+                  </TableCell>
                 )}
               </TableRow>
             ))}
@@ -72,7 +80,8 @@ export function CustomerTable({ rows, pageSize = 10, showLabel = true }: Custome
       {pageCount > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Halaman {page + 1} dari {pageCount} ({formatNumber(rows.length)} baris)
+            Halaman {page + 1} dari {pageCount} ({formatNumber(rows.length)}{" "}
+            baris)
           </p>
           <div className="flex gap-2">
             <Button

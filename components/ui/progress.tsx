@@ -10,11 +10,7 @@ function Progress({
   ...props
 }: ProgressPrimitive.Root.Props) {
   return (
-    <ProgressPrimitive.Root
-      data-slot="progress"
-      value={value}
-      {...props}
-    >
+    <ProgressPrimitive.Root data-slot="progress" value={value} {...props}>
       <ProgressPrimitive.Track
         className={cn(
           "block h-2 w-full overflow-hidden rounded-full bg-muted",

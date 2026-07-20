@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { FileDropzone } from "@/components/file-dropzone"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -25,10 +23,9 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import * as api from "@/lib/data/api"
 import { parseCustomerCsv } from "@/lib/data/csv"
-import { generateId, useActiveModel, useStore } from "@/lib/data/store"
-import { formatPercent } from "@/lib/format"
+import { predictRow, predictRows } from "@/lib/data/mock-api"
+import { generateId, useStore } from "@/lib/data/store"
 import type {
   CustomerRow,
   DayaVA,
@@ -38,11 +35,7 @@ import type {
   StatusBansos,
   StatusRumah,
 } from "@/lib/types"
-import {
-  IconAlertTriangle,
-  IconLoader2,
-  IconWand,
-} from "@tabler/icons-react"
+import { IconLoader2, IconWand } from "@tabler/icons-react"
 import { toast } from "sonner"
 
 // Urutan pilihan mengikuti kategori nyata dataset model (lihat lib/types.ts).
@@ -70,7 +63,12 @@ const PEKERJAAN_OPTS: Pekerjaan[] = [
 const RUMAH_OPTS: StatusRumah[] = ["Milik Sendiri", "Kontrak", "Menumpang"]
 const BANSOS_OPTS: StatusBansos[] = ["PKH", "BPNT", "PKH & BPNT", "Tidak"]
 const DAYA_OPTS: DayaVA[] = [450, 900, 1300, 2200]
-const TARIF_OPTS: GolonganTarif[] = ["R-1/450", "R-1/900", "R-1/1300", "R-1/2200"]
+const TARIF_OPTS: GolonganTarif[] = [
+  "R-1/450",
+  "R-1/900",
+  "R-1/1300",
+  "R-1/2200",
+]
 
 interface ManualForm {
   penghasilan: string
@@ -182,10 +180,9 @@ function NumberField({
   )
 }
 
-export default function PrediksiBaruPage() {
+export default function KlasifikasiBaruPage() {
   const router = useRouter()
   const { hydrated, dispatch, addActivity } = useStore()
-  const activeModel = useActiveModel()
 
   const [form, setForm] = React.useState<ManualForm>(EMPTY_FORM)
   const [touched, setTouched] = React.useState(false)
@@ -205,13 +202,11 @@ export default function PrediksiBaruPage() {
     jenis: "manual" | "batch",
     nama_file?: string
   ) {
-    if (!activeModel) return
     const id = generateId("prd")
     dispatch({
       type: "addPrediction",
       prediction: {
         id,
-        model_id: activeModel.id,
         jenis,
         nama_file,
         hasil,
@@ -223,15 +218,15 @@ export default function PrediksiBaruPage() {
     addActivity(
       "prediksi",
       jenis === "manual"
-        ? "Prediksi manual 1 pelanggan dijalankan"
-        : `Prediksi batch ${nama_file} (${hasil.length} data) dijalankan`
+        ? "Klasifikasi manual 1 pelanggan dijalankan"
+        : `Klasifikasi batch ${nama_file} (${hasil.length} data) dijalankan`
     )
-    router.push(`/prediksi/hasil/${id}`)
+    router.push(`/klasifikasi/hasil/${id}`)
   }
 
   async function runManual() {
     setTouched(true)
-    if (!manualValid || !activeModel) return
+    if (!manualValid) return
     setRunning(true)
     const row: CustomerRow = {
       id_pelanggan: `MAN-${Date.now().toString().slice(-6)}`,
@@ -245,26 +240,21 @@ export default function PrediksiBaruPage() {
       golongan_tarif: form.golongan_tarif!,
       pemakaian_kwh: Number(form.pemakaian_kwh),
     }
-    try {
-      const hasil = await api.predict(activeModel.id, [row], "manual")
-      commitPrediction(hasil, "manual")
-    } catch (e) {
-      setRunning(false)
-      toast.error(e instanceof api.ApiError ? e.message : "Gagal menjalankan prediksi.")
-    }
+    commitPrediction([predictRow(row)], "manual")
   }
 
   async function runBatch() {
-    if (!file || !activeModel) return
+    if (!file) return
     setRunning(true)
     try {
       const rows = await parseCustomerCsv(file)
-      if (rows.length === 0) throw new api.ApiError("File tidak berisi baris data.", "empty_file")
-      const hasil = await api.predict(activeModel.id, rows, "batch")
-      commitPrediction(hasil, "batch", file.name)
+      if (rows.length === 0) throw new Error("File tidak berisi baris data.")
+      commitPrediction(predictRows(rows), "batch", file.name)
     } catch (e) {
       setRunning(false)
-      toast.error(e instanceof api.ApiError ? e.message : "Gagal memproses file batch.")
+      toast.error(
+        e instanceof Error ? e.message : "Gagal memproses file batch."
+      )
     }
   }
 
@@ -277,43 +267,14 @@ export default function PrediksiBaruPage() {
     )
   }
 
-  if (!activeModel) {
-    return (
-      <div className="flex max-w-2xl flex-col gap-4">
-        <h2 className="text-xl font-semibold">Prediksi Baru</h2>
-        <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4">
-          <IconAlertTriangle className="size-5 shrink-0 text-warning" />
-          <div className="flex flex-col gap-2 text-sm">
-            <p className="font-medium">Belum ada model aktif</p>
-            <p className="text-muted-foreground">
-              Prediksi membutuhkan satu model yang ditetapkan sebagai model aktif. Latih
-              model terlebih dahulu, lalu aktifkan dari halaman evaluasi.
-            </p>
-            <Button className="w-fit" render={<Link href="/model/training" />}>
-              Latih Model Sekarang
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const showErr = (k: keyof ManualForm) => (touched ? errors[k] : undefined)
 
   return (
     <div className="flex max-w-3xl flex-col gap-4">
       <div>
-        <h2 className="text-xl font-semibold">Prediksi Baru</h2>
+        <h2 className="text-xl font-semibold">Klasifikasi Baru</h2>
         <p className="text-sm text-muted-foreground">
-          Klasifikasikan kelayakan penerima subsidi dengan model aktif.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3 rounded-2xl border p-4 text-sm">
-        <Badge className="bg-success/10 text-success dark:bg-success/20">Model Aktif</Badge>
-        <p>
-          <span className="font-medium">{activeModel.nama}</span> — accuracy{" "}
-          {formatPercent(activeModel.accuracy)}
+          Klasifikasikan kelayakan penerima subsidi berdasarkan data pelanggan.
         </p>
       </div>
 
@@ -333,7 +294,9 @@ export default function PrediksiBaruPage() {
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               <fieldset className="flex flex-col gap-4">
-                <legend className="mb-2 text-sm font-semibold">Sosial Ekonomi</legend>
+                <legend className="mb-2 text-sm font-semibold">
+                  Sosial Ekonomi
+                </legend>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <NumberField
                     id="penghasilan"
@@ -387,7 +350,9 @@ export default function PrediksiBaruPage() {
               </fieldset>
 
               <fieldset className="flex flex-col gap-4">
-                <legend className="mb-2 text-sm font-semibold">Kelistrikan</legend>
+                <legend className="mb-2 text-sm font-semibold">
+                  Kelistrikan
+                </legend>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="daya_va">Daya terpasang</Label>
@@ -403,7 +368,9 @@ export default function PrediksiBaruPage() {
                         aria-invalid={!!showErr("daya_va")}
                       >
                         <SelectValue>
-                          {form.daya_va != null ? `${form.daya_va} VA` : "Pilih…"}
+                          {form.daya_va != null
+                            ? `${form.daya_va} VA`
+                            : "Pilih…"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -415,7 +382,9 @@ export default function PrediksiBaruPage() {
                       </SelectContent>
                     </Select>
                     {showErr("daya_va") && (
-                      <p className="text-xs text-destructive">{showErr("daya_va")}</p>
+                      <p className="text-xs text-destructive">
+                        {showErr("daya_va")}
+                      </p>
                     )}
                   </div>
                   <SelectField
@@ -442,7 +411,11 @@ export default function PrediksiBaruPage() {
                 disabled={running || (touched && !manualValid)}
                 className="w-fit"
               >
-                {running ? <IconLoader2 className="animate-spin" /> : <IconWand />}
+                {running ? (
+                  <IconLoader2 className="animate-spin" />
+                ) : (
+                  <IconWand />
+                )}
                 {running ? "Menjalankan klasifikasi…" : "Jalankan Klasifikasi"}
               </Button>
             </CardContent>
@@ -465,8 +438,16 @@ export default function PrediksiBaruPage() {
                 error={fileError}
                 onError={setFileError}
               />
-              <Button onClick={runBatch} disabled={!file || running} className="w-fit">
-                {running ? <IconLoader2 className="animate-spin" /> : <IconWand />}
+              <Button
+                onClick={runBatch}
+                disabled={!file || running}
+                className="w-fit"
+              >
+                {running ? (
+                  <IconLoader2 className="animate-spin" />
+                ) : (
+                  <IconWand />
+                )}
                 {running ? "Menjalankan klasifikasi…" : "Jalankan Klasifikasi"}
               </Button>
             </CardContent>

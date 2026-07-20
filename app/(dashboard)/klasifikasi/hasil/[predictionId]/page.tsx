@@ -39,11 +39,10 @@ import {
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 
-export default function HasilPrediksiPage() {
+export default function HasilKlasifikasiPage() {
   const { predictionId } = useParams<{ predictionId: string }>()
   const { state, hydrated, dispatch, addActivity } = useStore()
   const prediction = state.predictions.find((p) => p.id === predictionId)
-  const model = state.models.find((m) => m.id === prediction?.model_id)
 
   if (!hydrated) {
     return (
@@ -58,8 +57,12 @@ export default function HasilPrediksiPage() {
     return (
       <EmptyState
         icon={<IconMoodConfuzed />}
-        title="Hasil prediksi tidak ditemukan"
-        action={<Button render={<Link href="/prediksi" />}>Ke Riwayat Prediksi</Button>}
+        title="Hasil klasifikasi tidak ditemukan"
+        action={
+          <Button render={<Link href="/klasifikasi" />}>
+            Ke Riwayat Klasifikasi
+          </Button>
+        }
       />
     )
   }
@@ -77,13 +80,12 @@ export default function HasilPrediksiPage() {
       report: {
         id: reportId,
         prediction_id: prediction.id,
-        model_id: prediction.model_id,
         judul,
         created_at: new Date().toISOString(),
       },
     })
     addActivity("laporan", `${judul} disimpan`)
-    toast.success("Hasil prediksi disimpan ke Laporan.")
+    toast.success("Hasil klasifikasi disimpan ke Laporan.")
   }
 
   const isManual = prediction.jenis === "manual"
@@ -94,20 +96,27 @@ export default function HasilPrediksiPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">
-            Hasil Prediksi {isManual ? "Manual" : `Batch — ${prediction.nama_file}`}
+            Hasil Klasifikasi{" "}
+            {isManual ? "Manual" : `Batch — ${prediction.nama_file}`}
           </h2>
           <p className="text-sm text-muted-foreground">
-            {formatDateTime(prediction.created_at)} · model: {model?.nama ?? prediction.model_id}
+            {formatDateTime(prediction.created_at)}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={saveToReport} disabled={saved} variant={saved ? "outline" : "default"}>
+          <Button
+            onClick={saveToReport}
+            disabled={saved}
+            variant={saved ? "outline" : "default"}
+          >
             {saved ? <IconCircleCheck /> : <IconDeviceFloppy />}
             {saved ? "Tersimpan ✔" : "Simpan ke Laporan"}
           </Button>
           <Button
             variant="outline"
-            onClick={() => toast.info("Fitur akan tersedia pada fase integrasi.")}
+            onClick={() =>
+              toast.info("Fitur akan tersedia pada fase integrasi.")
+            }
           >
             <IconDownload />
             Export CSV
@@ -129,7 +138,10 @@ export default function HasilPrediksiPage() {
                 {single.label.toUpperCase()}
               </p>
               <p className="text-sm text-muted-foreground">
-                Confidence: <span className="font-semibold">{formatPercent(single.confidence)}</span>
+                Confidence:{" "}
+                <span className="font-semibold">
+                  {formatPercent(single.confidence)}
+                </span>
               </p>
             </CardContent>
           </Card>
@@ -143,20 +155,33 @@ export default function HasilPrediksiPage() {
                 <TableBody>
                   {(
                     [
-                      ["Penghasilan / bulan", formatRupiah(single.input.penghasilan)],
-                      ["Jumlah anggota keluarga", String(single.input.jumlah_anggota)],
+                      [
+                        "Penghasilan / bulan",
+                        formatRupiah(single.input.penghasilan),
+                      ],
+                      [
+                        "Jumlah anggota keluarga",
+                        String(single.input.jumlah_anggota),
+                      ],
                       ["Pekerjaan kepala keluarga", single.input.pekerjaan],
                       ["Status rumah", single.input.status_rumah],
                       ["Luas bangunan", `${single.input.luas_bangunan} m²`],
                       ["Status bansos", single.input.status_bansos],
                       ["Daya terpasang", `${single.input.daya_va} VA`],
                       ["Golongan tarif", single.input.golongan_tarif],
-                      ["Pemakaian / bulan", `${single.input.pemakaian_kwh} kWh`],
+                      [
+                        "Pemakaian / bulan",
+                        `${single.input.pemakaian_kwh} kWh`,
+                      ],
                     ] as [string, string][]
                   ).map(([k, v]) => (
                     <TableRow key={k}>
-                      <TableCell className="text-muted-foreground">{k}</TableCell>
-                      <TableCell className="text-right font-medium">{v}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {k}
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {v}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -167,15 +192,24 @@ export default function HasilPrediksiPage() {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard label="Total data" value={formatNumber(prediction.hasil.length)} />
+            <StatCard
+              label="Total data"
+              value={formatNumber(prediction.hasil.length)}
+            />
             <StatCard
               label="Layak"
-              value={<span className="text-success">{formatNumber(prediction.jumlah_layak)}</span>}
+              value={
+                <span className="text-success">
+                  {formatNumber(prediction.jumlah_layak)}
+                </span>
+              }
             />
             <StatCard
               label="Tidak Layak"
               value={
-                <span className="text-destructive">{formatNumber(prediction.jumlah_tidak)}</span>
+                <span className="text-destructive">
+                  {formatNumber(prediction.jumlah_tidak)}
+                </span>
               }
             />
           </div>
@@ -204,10 +238,16 @@ export default function HasilPrediksiPage() {
                   <TableBody>
                     {prediction.hasil.map((h) => (
                       <TableRow key={h.id_pelanggan}>
-                        <TableCell className="font-mono text-xs">{h.id_pelanggan}</TableCell>
-                        <TableCell>{formatRupiah(h.input.penghasilan)}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {h.id_pelanggan}
+                        </TableCell>
+                        <TableCell>
+                          {formatRupiah(h.input.penghasilan)}
+                        </TableCell>
                         <TableCell>{h.input.daya_va}</TableCell>
-                        <TableCell>{formatNumber(h.input.pemakaian_kwh)}</TableCell>
+                        <TableCell>
+                          {formatNumber(h.input.pemakaian_kwh)}
+                        </TableCell>
                         <TableCell>{h.input.status_bansos}</TableCell>
                         <TableCell>
                           <LabelBadge label={h.label} />

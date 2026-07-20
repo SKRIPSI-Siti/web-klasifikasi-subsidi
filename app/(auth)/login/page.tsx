@@ -35,7 +35,10 @@ export default function LoginPage() {
     setSubmitting(true)
     // Simulasi autentikasi (MVP: kredensial dummy — lihat README)
     window.setTimeout(() => {
-      if (email.trim().toLowerCase() === ADMIN_USER.email && password === ADMIN_PASSWORD) {
+      if (
+        email.trim().toLowerCase() === ADMIN_USER.email &&
+        password === ADMIN_PASSWORD
+      ) {
         loginDummy()
         router.push("/dashboard")
         router.refresh()
@@ -53,9 +56,12 @@ export default function LoginPage() {
           <div className="flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
             <IconBolt className="size-5" />
           </div>
-          <h1 className="text-xl font-semibold">Sistem Klasifikasi Subsidi Listrik</h1>
+          <h1 className="text-xl font-semibold">
+            Sistem Klasifikasi Subsidi Listrik
+          </h1>
           <p className="text-sm text-muted-foreground">
-            PLN Aceh — Klasifikasi kelayakan penerima subsidi menggunakan LightGBM
+            PLN Aceh — Klasifikasi kelayakan penerima subsidi menggunakan
+            LightGBM
           </p>
         </div>
         <Card>
@@ -66,7 +72,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-4"
+              noValidate
+            >
               <div className="flex flex-col gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -98,7 +108,11 @@ export default function LoginPage() {
                     size="icon-sm"
                     className="absolute top-1/2 right-1 -translate-y-1/2"
                     onClick={() => setShowPassword((s) => !s)}
-                    aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                    aria-label={
+                      showPassword
+                        ? "Sembunyikan password"
+                        : "Tampilkan password"
+                    }
                   >
                     {showPassword ? <IconEyeOff /> : <IconEye />}
                   </Button>

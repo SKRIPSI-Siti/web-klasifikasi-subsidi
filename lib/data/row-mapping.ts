@@ -1,7 +1,6 @@
-// Pemetaan header → CustomerRow, dipakai bersama oleh parser CSV (lib/data/csv.ts) dan
-// parser dataset CSV/XLSX (lib/data/dataset-file.ts). Menerima header bergaya Data
-// Dictionary (penghasilan, daya_va, …) maupun nama kolom asli dataset model
-// (Penghasilan, VA, KwH_Perbulan, …).
+// Pemetaan header → CustomerRow, dipakai oleh parser CSV prediksi batch (lib/data/csv.ts).
+// Menerima header bergaya Data Dictionary (penghasilan, daya_va, …) maupun nama kolom asli
+// dataset model (Penghasilan, VA, KwH_Perbulan, …).
 
 import type {
   CustomerRow,
